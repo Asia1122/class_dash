@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학급 운영 통합 대시보드 — 상암초등학교</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:linear-gradient(135deg,#e8f8ec 0%,#f0fdf4 50%,#e0f2fe 100%);
+  min-height:100vh;overflow:hidden;
+  font-size:16px; /* 기준 폰트 — 전체 30% 확대 */
+}
+#canvas{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+/* ── 카드 공통 ── */
+.card{
+  position:absolute;
+  background:rgba(255,255,255,0.80);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(178,242,187,0.5);
+  border-radius:20px;
+  box-shadow:0 8px 32px rgba(34,139,34,0.10),0 2px 8px rgba(0,0,0,0.05);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  min-width:200px;min-height:80px;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px 10px;
+  background:linear-gradient(135deg,rgba(178,242,187,0.38),rgba(144,238,160,0.18));
+  border-bottom:1px solid rgba(178,242,187,0.38);
+  cursor:grab;user-select:none;flex-shrink:0;
+}
+.card-header:active{cursor:grabbing;}
+.card-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:17px;font-weight:700;color:#1a5c2a; /* 기존 13px → 17px */
+}
+.card-icon{
+  width:30px;height:30px;
+  background:linear-gradient(135deg,#b2f2bb,#6ee7a0);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.card-body{flex:1;overflow:auto;padding:14px 18px;}
+.card-body::-webkit-scrollbar{width:3px;}
+.card-body::-webkit-scrollbar-thumb{background:rgba(178,242,187,0.6);border-radius:2px;}
+
+/* 리사이즈 핸들 */
+.resize-handle{
+  position:absolute;right:0;bottom:0;
+  width:22px;height:22px;cursor:se-resize;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0.4;transition:opacity 0.2s;z-index:10;
+}
+.resize-handle:hover{opacity:1;}
+.resize-handle svg{width:14px;height:14px;}
+
+/* ── 시계 ── */
+.clock-ampm{
+  font-family:'Noto Sans KR',sans-serif;
+  font-size:28px;font-weight:700; /* 기존 ≈22px → 28px */
+  color:#2d7a3a;margin-bottom:2px;text-align:center;
+}
+.clock-time{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(32px,4.5vw,58px); /* 기존 clamp(22,3vw,40) → 30% 증가 */
+  font-weight:700;color:#1a5c2a;
+  letter-spacing:2px;text-align:center;
+  line-height:1.05;margin-bottom:6px;
+}
+.clock-date{
+  font-size:19px;color:#4a7a4a;font-weight:500;text-align:center; /* 기존 13px → 19px */
+  margin-top:4px;
+}
+.clock-day{
+  display:inline-block;margin-top:7px;
+  background:linear-gradient(135deg,#b2f2bb,#6ee7a0);
+  color:#1a5c2a;font-size:15px;font-weight:700; /* 기존 11px → 15px */
+  padding:3px 14px;border-radius:20px;
+}
+
+/* ── 급식 ── */
+.meal-date-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(178,242,187,0.4);color:#2d6a2d;
+  font-size:14px;font-weight:600; /* 기존 11px → 14px */
+  padding:3px 10px;border-radius:20px;margin-bottom:10px;
+}
+.meal-item{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:6px 0;font-size:16px;color:#2d4a2d; /* 기존 12px → 16px */
+  border-bottom:0.5px solid rgba(178,242,187,0.3);
+}
+.meal-item:last-child{border-bottom:none;}
+.meal-dot{width:7px;height:7px;background:#6ee7a0;border-radius:50%;margin-top:6px;flex-shrink:0;}
+.meal-loading{text-align:center;padding:16px;color:#7aaa7a;font-size:15px;}
+.api-note{
+  font-size:13px;color:#7aaa7a;margin-top:8px; /* 기존 10px → 13px */
+  padding:7px 10px;background:rgba(178,242,187,0.2);
+  border-radius:8px;line-height:1.6;
+}
+.meal-status{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;padding:2px 8px;border-radius:10px;margin-left:6px;
+}
+.meal-live{background:rgba(100,220,130,0.25);color:#1a5c2a;}
+.meal-demo{background:rgba(255,200,100,0.25);color:#7a5a00;}
+
+/* ── 시간표 ── */
+.timetable{width:100%;border-collapse:collapse;}
+.timetable th{
+  background:linear-gradient(135deg,#b2f2bb,#6ee7a0);
+  color:#1a5c2a;padding:7px 5px;text-align:center;font-weight:700;
+  font-size:14px; /* 기존 10px → 14px */
+}
+.timetable th:first-child{border-radius:8px 0 0 0;}
+.timetable th:last-child{border-radius:0 8px 0 0;}
+.timetable td{
+  padding:6px 4px;text-align:center;
+  border-bottom:0.5px solid rgba(178,242,187,0.35);color:#2d4a2d;
+}
+.timetable tr:last-child td{border-bottom:none;}
+.timetable tr:nth-child(even) td{background:rgba(178,242,187,0.09);}
+.period-num{font-weight:700;color:#1a5c2a;font-size:14px;} /* 기존 10px → 14px */
+.stag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:13px;font-weight:600;} /* 기존 10px → 13px */
+.s-kor{background:rgba(178,242,187,0.4);color:#1a5c2a;}
+.s-math{background:rgba(186,225,255,0.5);color:#1a3a5c;}
+.s-eng{background:rgba(255,235,180,0.5);color:#5c3a00;}
+.s-sci{background:rgba(220,200,255,0.5);color:#3a1a5c;}
+.s-soc{background:rgba(255,200,200,0.4);color:#5c1a1a;}
+.s-art{background:rgba(255,220,180,0.4);color:#5c2a00;}
+.s-pe{background:rgba(180,240,200,0.5);color:#1a4a2a;}
+.s-mu{background:rgba(255,200,240,0.4);color:#5c0a3a;}
+
+/* 스프레드시트 */
+.sheet-frame{width:100%;height:100%;border:none;}
+
+/* 달력 버튼 */
+.cal-open-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,#b2f2bb,#74d99f);
+  border:none;border-radius:10px;
+  padding:7px 13px;font-size:14px;font-weight:700;color:#1a5c2a; /* 기존 11px → 14px */
+  cursor:pointer;transition:all 0.2s;font-family:inherit;
+}
+.cal-open-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(100,200,100,0.3);}
+
+/* 툴바 힌트 */
+#toolbar{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(178,242,187,0.5);
+  border-radius:16px;
+  padding:8px 20px;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.08);
+  z-index:999;
+  font-size:15px;color:#4a7a4a;font-weight:500; /* 기존 12px → 15px */
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/* 달력 모달 */
+#calModal{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.32);
+  backdrop-filter:blur(4px);
+  z-index:500;
+  align-items:center;justify-content:center;
+}
+#calModal.active{display:flex;}
+.modal-box{
+  background:rgba(255,255,255,0.96);
+  border-radius:22px;
+  border:1px solid rgba(178,242,187,0.5);
+  box-shadow:0 24px 60px rgba(0,0,0,0.18);
+  overflow:hidden;
+  width:min(88vw,820px);
+  display:flex;flex-direction:column;
+}
+.modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 20px;
+  background:linear-gradient(135deg,rgba(178,242,187,0.45),rgba(144,238,160,0.25));
+  border-bottom:1px solid rgba(178,242,187,0.4);
+}
+.modal-ttl{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#1a5c2a;} /* 기존 14px → 18px */
+.close-btn{
+  background:rgba(255,255,255,0.6);border:1px solid rgba(178,242,187,0.5);
+  border-radius:50%;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;color:#4a7a4a;font-family:inherit;
+}
+.close-btn:hover{background:rgba(178,242,187,0.5);}
+.modal-cal-body{
+  width:100%;height:500px;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;
+  background:rgba(178,242,187,0.06);
+}
+.modal-cal-body p{font-size:15px;color:#4a7a4a;text-align:center;line-height:2;} /* 기존 12px → 15px */
+.modal-cal-body code{
+  font-size:13px;background:rgba(178,242,187,0.35);
+  padding:3px 10px;border-radius:6px;display:inline-block;margin-top:4px;
+}
+.cal-frame{width:100%;height:100%;border:none;}
+</style>
+</head>
+<body>
+
+<div id="canvas">
+
+  <!-- 힌트 툴바 -->
+  <div id="toolbar">
+    ✦ 헤더를 드래그해서 이동 &nbsp;·&nbsp; 우측 하단 모서리를 끌어 크기 조절
+  </div>
+
+  <!-- ─────────────── 학급 기록부 ─────────────── -->
+  <div class="card" id="c-sheet" style="left:16px;top:56px;width:62%;height:calc(100vh - 72px);">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">📋</div>학급 기록부
+      </div>
+      <button class="cal-open-btn" onclick="document.getElementById('calModal').classList.add('active')">
+        📅 학급 달력 열기
+      </button>
+    </div>
+    <div class="card-body" style="padding:0;flex:1;">
+      <iframe class="sheet-frame"
+        src="https://docs.google.com/spreadsheets/d/13BQi53zdUsyCFAAJoTnIJfHOs2rJcOmAvsBOB6nJMDQ/edit?gid=1848563708#gid=1848563708"
+        allowfullscreen title="학급 기록부 스프레드시트">
+      </iframe>
+    </div>
+    <div class="resize-handle" data-target="c-sheet">
+      <svg viewBox="0 0 12 12" fill="none" stroke="#4a7a4a" stroke-width="1.5">
+        <path d="M2 10 L10 2M6 10 L10 6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ─────────────── 시계 ─────────────── -->
+  <div class="card" id="c-clock" style="right:16px;top:56px;width:calc(38% - 28px);height:220px;">
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">🕐</div>현재 시각</div>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="clock-ampm" id="clock-ampm">오전</div>
+      <div class="clock-time" id="clock">00:00:00</div>
+      <div class="clock-date" id="clock-date"></div>
+      <div class="clock-day" id="clock-day"></div>
+    </div>
+    <div class="resize-handle" data-target="c-clock">
+      <svg viewBox="0 0 12 12" fill="none" stroke="#4a7a4a" stroke-width="1.5">
+        <path d="M2 10 L10 2M6 10 L10 6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ─────────────── 오늘의 급식 ─────────────── -->
+  <div class="card" id="c-meal" style="right:16px;top:288px;width:calc(38% - 28px);height:auto;min-height:140px;">
+    <div class="card-header">
+      <div class="card-title">
+        <div class="card-icon">🍱</div>오늘의 급식
+        <span class="meal-status" id="meal-status-badge"></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meal-date-badge">📅 <span id="meal-date"></span></div>
+      <div id="meal-list"><div class="meal-loading">급식 정보 불러오는 중...</div></div>
+      <div class="api-note" id="api-note" style="display:none;"></div>
+    </div>
+    <div class="resize-handle" data-target="c-meal">
+      <svg viewBox="0 0 12 12" fill="none" stroke="#4a7a4a" stroke-width="1.5">
+        <path d="M2 10 L10 2M6 10 L10 6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ─────────────── 시간표 (높이 자동) ─────────────── -->
+  <div class="card" id="c-tt" style="right:16px;top:auto;width:calc(38% - 28px);">
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">📚</div>우리 반 시간표</div>
+    </div>
+    <div class="card-body" style="padding:12px 14px;">
+      <!--
+        ★ 시간표 수정: 아래 표의 텍스트와 클래스 변경
+        클래스: s-kor s-math s-eng s-sci s-soc s-art s-pe s-mu
+      -->
+      <table class="timetable" id="tt-table">
+        <thead>
+          <tr><th>교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="period-num">1</td>
+            <td><span class="stag s-kor">국어</span></td>
+            <td><span class="stag s-math">수학</span></td>
+            <td><span class="stag s-kor">국어</span></td>
+            <td><span class="stag s-eng">영어</span></td>
+            <td><span class="stag s-math">수학</span></td>
+          </tr>
+          <tr>
+            <td class="period-num">2</td>
+            <td><span class="stag s-math">수학</span></td>
+            <td><span class="stag s-kor">국어</span></td>
+            <td><span class="stag s-sci">과학</span></td>
+            <td><span class="stag s-soc">사회</span></td>
+            <td><span class="stag s-kor">국어</span></td>
+          </tr>
+          <tr>
+            <td class="period-num">3</td>
+            <td><span class="stag s-eng">영어</span></td>
+            <td><span class="stag s-sci">과학</span></td>
+            <td><span class="stag s-math">수학</span></td>
+            <td><span class="stag s-kor">국어</span></td>
+            <td><span class="stag s-pe">체육</span></td>
+          </tr>
+          <tr>
+            <td class="period-num">4</td>
+            <td><span class="stag s-soc">사회</span></td>
+            <td><span class="stag s-pe">체육</span></td>
+            <td><span class="stag s-eng">영어</span></td>
+            <td><span class="stag s-math">수학</span></td>
+            <td><span class="stag s-sci">과학</span></td>
+          </tr>
+          <tr>
+            <td class="period-num">5</td>
+            <td><span class="stag s-art">미술</span></td>
+            <td><span class="stag s-mu">음악</span></td>
+            <td><span class="stag s-soc">사회</span></td>
+            <td><span class="stag s-art">미술</span></td>
+            <td><span class="stag s-soc">사회</span></td>
+          </tr>
+          <tr>
+            <td class="period-num">6</td>
+            <td><span class="stag s-mu">음악</span></td>
+            <td><span class="stag s-eng">영어</span></td>
+            <td><span class="stag s-pe">체육</span></td>
+            <td><span class="stag s-sci">과학</span></td>
+            <td><span class="stag s-art">미술</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- 시간표는 리사이즈 핸들 없음 — 내용에 맞게 자동 조절 -->
+  </div>
+
+  <!-- ─────────────── 달력 모달 ─────────────── -->
+  <div id="calModal">
+    <div class="modal-box">
+      <div class="modal-hdr">
+        <div class="modal-ttl">📅 학급 달력</div>
+        <button class="close-btn" onclick="document.getElementById('calModal').classList.remove('active')">✕</button>
+      </div>
+      <!--
+        ★ 구글 캘린더 연결:
+        1. Google Calendar → 설정 → 캘린더 통합 → 공개 설정
+        2. 삽입 코드의 src URL을 복사
+        3. 아래 div를 지우고 아래 iframe으로 교체:
+           <iframe class="cal-frame"
+             src="https://calendar.google.com/calendar/embed?src=CALENDAR_ID@group.calendar.google.com&ctz=Asia%2FSeoul"
+             title="학급 달력">
+           </iframe>
+      -->
+      <div class="modal-cal-body">
+        <div style="font-size:46px;">📅</div>
+        <div style="font-size:18px;font-weight:700;color:#1a5c2a;">구글 캘린더를 연결해 주세요</div>
+        <p>
+          Google Calendar → 설정 → 캘린더 통합<br>
+          → 공개 설정 후 삽입 코드의 src를 복사<br>
+          → 이 HTML 파일의 주석 부분에 붙여넣기
+          <br>
+          <code>calendar.google.com/calendar/embed?src=...</code>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+<script>
+/* ══════════════════════════════════════════════
+   시계 — 12시간제 (오전/오후)
+══════════════════════════════════════════════ */
+const DAYS   = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+function updateClock() {
+  const n = new Date();
+  const h24 = n.getHours();
+  const isAM = h24 < 12;
+  const h12 = h24 % 12 || 12;
+
+  document.getElementById('clock-ampm').textContent = isAM ? '오전' : '오후';
+  document.getElementById('clock').textContent =
+    String(h12).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+  document.getElementById('clock-date').textContent =
+    n.getFullYear() + '년 ' + MONTHS[n.getMonth()] + ' ' + n.getDate() + '일';
+  document.getElementById('clock-day').textContent = DAYS[n.getDay()];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ══════════════════════════════════════════════
+   시간표 카드 — 내용 높이에 맞게 자동 위치/크기
+══════════════════════════════════════════════ */
+function positionTimetable() {
+  const meal  = document.getElementById('c-meal');
+  const tt    = document.getElementById('c-tt');
+  const mealBottom = meal.getBoundingClientRect().bottom;
+  const ttHeight   = tt.offsetHeight; /* 내용 기반 자연 높이 */
+  const gap = 12;
+  const maxBottom = window.innerHeight - 16;
+
+  let top = mealBottom + gap;
+  /* 화면 넘치면 위로 조정 */
+  if (top + ttHeight > maxBottom) {
+    top = maxBottom - ttHeight;
+  }
+  tt.style.top = top + 'px';
+}
+
+/* ══════════════════════════════════════════════
+   급식 — 나이스 오픈 API (상암초등학교 자동 검색)
+   -----------------------------------------------
+   학교코드 자동 조회 절차:
+   1. schoolInfo API → ATPT_OFCDC_SC_CODE=J10 + SCHUL_NM=상암초등학교
+   2. SD_SCHUL_CODE 추출 → mealServiceDietInfo 호출
+
+   ★ CORS 해결:
+     - GitHub Pages / Netlify 등 HTTPS 서버에 배포 후 사용
+     - 로컬 file:// 에서는 CORS 오류로 자동 더미 데이터로 전환됨
+
+   ★ API 키 발급:
+     open.neis.go.kr 회원가입 후 무료 발급
+     발급 전에는 demo 키로도 일부 조회 가능 (건수 제한)
+══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════
+   나이스 급식 설정값
+   ATPT_CODE  : J10 = 전라남도교육청
+   SCHOOL_CODE: 상암초등학교(여수) 나이스 표준학교코드
+   ★ 학교코드 확인 방법:
+      open.neis.go.kr → 학교기본정보 → J10 + 상암초등학교 검색
+══════════════════════════════════════ */
+const NEIS_KEY    = '274db1736f1049c88aac066d53196ddc';
+const ATPT_CODE   = 'J10';
+const SCHOOL_CODE = '7560080'; /* 여수 상암초등학교 */
+
+/* CORS 우회 — 나이스 API는 브라우저 직접 fetch 불가
+   corsproxy.io(1차) → allorigins.win(2차) 순서로 시도 */
+const DUMMY = ['흑미밥','육개장','버섯들깨볶음','깍두기','오징어볶음','우유'];
+
+function getTodayYMD() {
+  const n = new Date();
+  return n.getFullYear() +
+    String(n.getMonth()+1).padStart(2,'0') +
+    String(n.getDate()).padStart(2,'0');
+}
+function renderMealDate() {
+  const n = new Date();
+  document.getElementById('meal-date').textContent =
+    n.getFullYear() + '년 ' + (n.getMonth()+1) + '월 ' + n.getDate() + '일';
+}
+function renderMeals(items) {
+  document.getElementById('meal-list').innerHTML =
+    items.map(i =>
+      `<div class="meal-item"><span class="meal-dot"></span><span>${i}</span></div>`
+    ).join('');
+  setTimeout(positionTimetable, 80);
+}
+function showDummy(reason) {
+  renderMeals(DUMMY);
+  const note = document.getElementById('api-note');
+  note.style.display = 'block';
+  note.textContent = '💡 ' + reason;
+  document.getElementById('meal-status-badge').innerHTML =
+    '<span class="meal-status meal-demo">예시</span>';
+  setTimeout(positionTimetable, 80);
+}
+
+/* JSON 응답 받기 — 직접 → corsproxy → allorigins 순 시도 */
+async function fetchJSON(apiUrl) {
+  /* 1차: 직접 */
+  try {
+    const r = await fetch(apiUrl);
+    return await r.json();
+  } catch(_) {}
+
+  /* 2차: corsproxy.io (raw JSON 반환) */
+  try {
+    const r = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`);
+    return await r.json();
+  } catch(_) {}
+
+  /* 3차: allorigins.win (contents 필드 안에 문자열로 감싸짐) */
+  const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`);
+  const wrapper = await r.json();
+  return JSON.parse(wrapper.contents);
+}
+
+async function loadMeal() {
+  renderMealDate();
+  const ymd = getTodayYMD();
+  const neisUrl = `https://open.neis.go.kr/hub/mealServiceDietInfo` +
+    `?KEY=${NEIS_KEY}&Type=json` +
+    `&ATPT_OFCDC_SC_CODE=${ATPT_CODE}` +
+    `&SD_SCHUL_CODE=${SCHOOL_CODE}` +
+    `&MLSV_YMD=${ymd}` +
+    `&MMEAL_SC_CODE=2`;
+
+  try {
+    const data = await fetchJSON(neisUrl);
+    const dish = data?.mealServiceDietInfo?.[1]?.row?.[0]?.DDISH_NM;
+    if (!dish) { showDummy('오늘 급식 정보가 없습니다'); return; }
+    const items = dish.split('<br/>').map(i => i.replace(/\s*\([\d.]+\)/g,'').trim()).filter(Boolean);
+    renderMeals(items);
+    document.getElementById('meal-status-badge').innerHTML =
+      '<span class="meal-status meal-live">실시간</span>';
+  } catch(e) {
+    showDummy('급식 서버 연결 실패 — 예시 데이터');
+    console.warn('[급식]', e);
+  }
+}
+loadMeal();
+
+/* ══════════════════════════════════════════════
+   달력 모달
+══════════════════════════════════════════════ */
+document.getElementById('calModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('active');
+});
+
+/* ══════════════════════════════════════════════
+   드래그 & 리사이즈
+══════════════════════════════════════════════ */
+let dragState = null, resizeState = null;
+
+document.querySelectorAll('.card-header').forEach(hdr => {
+  hdr.addEventListener('mousedown', e => {
+    if (e.target.closest('.cal-open-btn')) return;
+    const card = hdr.closest('.card');
+    const rect = card.getBoundingClientRect();
+    dragState = { card, ox: e.clientX - rect.left, oy: e.clientY - rect.top };
+    card.style.zIndex = 50;
+    e.preventDefault();
+  });
+  hdr.addEventListener('touchstart', e => {
+    if (e.target.closest('.cal-open-btn')) return;
+    const t = e.touches[0];
+    const card = hdr.closest('.card');
+    const rect = card.getBoundingClientRect();
+    dragState = { card, ox: t.clientX - rect.left, oy: t.clientY - rect.top };
+    e.preventDefault();
+  }, { passive: false });
+});
+
+document.querySelectorAll('.resize-handle').forEach(rh => {
+  rh.addEventListener('mousedown', e => {
+    const card = document.getElementById(rh.dataset.target);
+    const rect  = card.getBoundingClientRect();
+    resizeState = { card, sx: e.clientX, sy: e.clientY, sw: rect.width, sh: rect.height };
+    card.style.zIndex = 50;
+    e.preventDefault(); e.stopPropagation();
+  });
+});
+
+function handleMove(cx, cy) {
+  if (dragState) {
+    const { card, ox, oy } = dragState;
+    const cv = document.getElementById('canvas');
+    const cr = cv.getBoundingClientRect();
+    let nx = Math.max(0, Math.min(cx - cr.left - ox, cr.width  - card.offsetWidth));
+    let ny = Math.max(0, Math.min(cy - cr.top  - oy, cr.height - card.offsetHeight));
+    card.style.left = nx + 'px';
+    card.style.top  = ny + 'px';
+    card.style.right = 'auto';
+    /* 시간표 연동 위치 갱신 */
+    if (card.id === 'c-meal') positionTimetable();
+  }
+  if (resizeState) {
+    const { card, sx, sy, sw, sh } = resizeState;
+    card.style.width  = Math.max(200, sw + (cx - sx)) + 'px';
+    card.style.height = Math.max(80,  sh + (cy - sy)) + 'px';
+    if (card.id === 'c-meal') positionTimetable();
+  }
+}
+
+document.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
+document.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  handleMove(t.clientX, t.clientY);
+  if (dragState || resizeState) e.preventDefault();
+}, { passive: false });
+
+function endInteraction() {
+  if (dragState)   { dragState.card.style.zIndex = '';   dragState   = null; }
+  if (resizeState) { resizeState.card.style.zIndex = ''; resizeState = null; }
+}
+document.addEventListener('mouseup',  endInteraction);
+document.addEventListener('touchend', endInteraction);
+
+/* 초기 시간표 위치 설정 (DOM 렌더 후) */
+window.addEventListener('load', () => setTimeout(positionTimetable, 200));
+window.addEventListener('resize', positionTimetable);
+</script>
+</body>
+</html>
