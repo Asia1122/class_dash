@@ -463,17 +463,30 @@ function saveToCloud(data) {
   if (!currentUser) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function() {
+    console.log('[Firebase] 저장 중:', Object.keys(data));
     userDoc().set(data, {merge: true}).then(function() {
+      console.log('[Firebase] 저장 완료');
       var ind = document.getElementById('save-indicator');
       ind.style.display = 'inline';
       setTimeout(function(){ ind.style.display='none'; }, 2000);
+    }).catch(function(e) {
+      console.error('[Firebase] 저장 실패:', e);
     });
   }, 1000);
 }
 function loadFromCloud(callback) {
   if (!currentUser) return;
   userDoc().get().then(function(doc) {
-    callback(doc.exists ? doc.data() : {});
+    if (doc.exists) {
+      console.log('[Firebase] 데이터 불러옴:', Object.keys(doc.data()));
+      callback(doc.data());
+    } else {
+      console.log('[Firebase] 저장된 데이터 없음 (새 사용자)');
+      callback({});
+    }
+  }).catch(function(e) {
+    console.error('[Firebase] 불러오기 실패:', e);
+    callback({});
   });
 }
 
