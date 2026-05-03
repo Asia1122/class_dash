@@ -29,7 +29,7 @@ function renderBookmarks(){
   }
   el.innerHTML=bookmarkList.map(function(b){
     return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
-      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display=\'none\'">'+
       '<span class="bookmark-name">'+b.name+'</span>'+
       '<span class="bookmark-arrow">↗</span>'+
     '</a>';
@@ -55,7 +55,7 @@ function saveBookmarks(){
     if(!url.startsWith('http')) url='https://'+url;
     return{name:name,url:url};
   }).filter(function(b){return b.name&&b.url;});
-  document.getElementById('bookmark-edit').style.display='none';
+  document.getElementById('bookmark-edit').style.display=\'none\';
   renderBookmarks();
   saveToCloud({bookmarks:bookmarkList});
 }
@@ -86,7 +86,7 @@ function renderBookmarks(){
   }
   el.innerHTML=bookmarkList.map(function(b){
     return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
-      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display=\'none\'">'+
       '<span class="bookmark-name">'+b.name+'</span>'+
       '<span class="bookmark-arrow">↗</span>'+
     '</a>';
@@ -112,7 +112,7 @@ function saveBookmarks(){
     if(!url.startsWith('http')) url='https://'+url;
     return{name:name,url:url};
   }).filter(function(b){return b.name&&b.url;});
-  document.getElementById('bookmark-edit').style.display='none';
+  document.getElementById('bookmark-edit').style.display=\'none\';
   renderBookmarks();
   saveToCloud({bookmarks:bookmarkList});
 }
@@ -143,7 +143,7 @@ function renderBookmarks(){
   }
   el.innerHTML=bookmarkList.map(function(b){
     return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
-      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display=\'none\'">'+
       '<span class="bookmark-name">'+b.name+'</span>'+
       '<span class="bookmark-arrow">↗</span>'+
     '</a>';
@@ -169,7 +169,7 @@ function saveBookmarks(){
     if(!url.startsWith('http')) url='https://'+url;
     return{name:name,url:url};
   }).filter(function(b){return b.name&&b.url;});
-  document.getElementById('bookmark-edit').style.display='none';
+  document.getElementById('bookmark-edit').style.display=\'none\';
   renderBookmarks();
   saveToCloud({bookmarks:bookmarkList});
 }
@@ -635,14 +635,14 @@ auth.onAuthStateChanged(function(user){
   var loginState=document.getElementById('login-state');
   var logoutState=document.getElementById('logout-state');
   if(user){
-    loginState.style.display='none';
+    loginState.style.display=\'none\';
     logoutState.style.display='flex';
     document.getElementById('user-avatar').src=user.photoURL||'';
     document.getElementById('user-name').textContent=user.displayName||user.email;
     loadFromCloud(applyCloudData);
   } else {
     loginState.style.display='block';
-    logoutState.style.display='none';
+    logoutState.style.display=\'none\';
   }
 });
 
@@ -655,7 +655,7 @@ function saveToCloud(data){
     userDoc().set(data,{merge:true}).then(function(){
       var b=document.getElementById('save-badge');
       b.style.display='block';
-      setTimeout(function(){b.style.display='none';},2000);
+      setTimeout(function(){b.style.display=\'none\';},2000);
     }).catch(function(e){console.error('[저장실패]',e);});
   },1000);
 }
@@ -812,7 +812,7 @@ updateTimerUI();
 var studentList=['학생1','학생2','학생3'];
 function updatePickerCount(){document.getElementById('picker-count').textContent='총 '+studentList.length+'명';}
 function togglePickerEdit(){var el=document.getElementById('picker-edit');var show=el.style.display!=='none';el.style.display=show?'none':'block';if(!show)document.getElementById('picker-textarea').value=studentList.join('\n');}
-function saveStudents(){studentList=document.getElementById('picker-textarea').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);document.getElementById('picker-edit').style.display='none';updatePickerCount();saveToCloud({students:studentList});}
+function saveStudents(){studentList=document.getElementById('picker-textarea').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);document.getElementById('picker-edit').style.display=\'none\';updatePickerCount();saveToCloud({students:studentList});}
 var pickTick=null;
 function pickRandom(){
   if(!studentList.length){document.getElementById('picker-name').textContent='명단을 입력하세요';return;}
@@ -879,7 +879,7 @@ function renderSticker(){
 }
 function changeSticker(name,delta){stickerData[name]=(stickerData[name]||0)+delta;if(stickerData[name]<0)stickerData[name]=0;renderSticker();saveToCloud({stickerData:stickerData});}
 function toggleStickerEdit(){var el=document.getElementById('sticker-edit');var show=el.style.display!=='none';el.style.display=show?'none':'block';if(!show)document.getElementById('sticker-textarea').value=stickerStudents.join('\n');}
-function saveStickerStudents(){stickerStudents=document.getElementById('sticker-textarea').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);document.getElementById('sticker-edit').style.display='none';renderSticker();saveToCloud({stickerStudents:stickerStudents});}
+function saveStickerStudents(){stickerStudents=document.getElementById('sticker-textarea').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);document.getElementById('sticker-edit').style.display=\'none\';renderSticker();saveToCloud({stickerStudents:stickerStudents});}
 renderSticker();
 
 /* ══ 달력 ══ */
@@ -982,7 +982,7 @@ function togglePalette(e){
 }
 function pickTheme(name){
   setTheme(name);
-  document.getElementById('color-palette').style.display='none';
+  document.getElementById('color-palette').style.display=\'none\';
   var btn=document.getElementById('theme-btn');
   if(btn) btn.textContent='🎨 색상변경';
   document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('active');});
@@ -1045,7 +1045,7 @@ function renderBookmarks(){
   }
   el.innerHTML=bookmarkList.map(function(b){
     return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
-      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display=\'none\'">'+
       '<span class="bookmark-name">'+b.name+'</span>'+
       '<span class="bookmark-arrow">↗</span>'+
     '</a>';
@@ -1071,7 +1071,7 @@ function saveBookmarks(){
     if(!url.startsWith('http')) url='https://'+url;
     return{name:name,url:url};
   }).filter(function(b){return b.name&&b.url;});
-  document.getElementById('bookmark-edit').style.display='none';
+  document.getElementById('bookmark-edit').style.display=\'none\';
   renderBookmarks();
   saveToCloud({bookmarks:bookmarkList});
 }
