@@ -5,9 +5,177 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>학급 운영 통합 대시보드</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+/* ══ 즐겨찾기 ══ */
+var DEFAULT_BOOKMARKS=[
+  {name:'나이스',url:'https://neis.go.kr'},
+  {name:'에듀넷',url:'https://edunet.net'},
+  {name:'학교알리미',url:'https://www.schoolinfo.go.kr'},
+  {name:'공공데이터포털',url:'https://data.go.kr'},
+];
+var bookmarkList=DEFAULT_BOOKMARKS.slice();
+
+function getFavicon(url){
+  try{var u=new URL(url);return'https://www.google.com/s2/favicons?domain='+u.hostname+'&sz=16';}
+  catch(e){return'';}
+}
+
+function renderBookmarks(){
+  var el=document.getElementById('bookmark-list');
+  if(!el)return;
+  if(!bookmarkList.length){
+    el.innerHTML='<div style="color:#ccc;font-size:12px;text-align:center;padding:12px;">✏️ 편집을 눌러 추가하세요</div>';
+    return;
+  }
+  el.innerHTML=bookmarkList.map(function(b){
+    return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<span class="bookmark-name">'+b.name+'</span>'+
+      '<span class="bookmark-arrow">↗</span>'+
+    '</a>';
+  }).join('');
+}
+
+function toggleBookmarkEdit(){
+  var el=document.getElementById('bookmark-edit');
+  var showing=el.style.display!=='none';
+  el.style.display=showing?'none':'block';
+  if(!showing){
+    document.getElementById('bookmark-textarea').value=
+      bookmarkList.map(function(b){return b.name+','+b.url;}).join('\n');
+  }
+}
+
+function saveBookmarks(){
+  var lines=document.getElementById('bookmark-textarea').value.split('\n');
+  bookmarkList=lines.map(function(line){
+    var parts=line.split(',');
+    var name=parts[0]?parts[0].trim():'';
+    var url=parts.slice(1).join(',').trim();
+    if(!url.startsWith('http')) url='https://'+url;
+    return{name:name,url:url};
+  }).filter(function(b){return b.name&&b.url;});
+  document.getElementById('bookmark-edit').style.display='none';
+  renderBookmarks();
+  saveToCloud({bookmarks:bookmarkList});
+}
+
+renderBookmarks();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js">
+/* ══ 즐겨찾기 ══ */
+var DEFAULT_BOOKMARKS=[
+  {name:'나이스',url:'https://neis.go.kr'},
+  {name:'에듀넷',url:'https://edunet.net'},
+  {name:'학교알리미',url:'https://www.schoolinfo.go.kr'},
+  {name:'공공데이터포털',url:'https://data.go.kr'},
+];
+var bookmarkList=DEFAULT_BOOKMARKS.slice();
+
+function getFavicon(url){
+  try{var u=new URL(url);return'https://www.google.com/s2/favicons?domain='+u.hostname+'&sz=16';}
+  catch(e){return'';}
+}
+
+function renderBookmarks(){
+  var el=document.getElementById('bookmark-list');
+  if(!el)return;
+  if(!bookmarkList.length){
+    el.innerHTML='<div style="color:#ccc;font-size:12px;text-align:center;padding:12px;">✏️ 편집을 눌러 추가하세요</div>';
+    return;
+  }
+  el.innerHTML=bookmarkList.map(function(b){
+    return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<span class="bookmark-name">'+b.name+'</span>'+
+      '<span class="bookmark-arrow">↗</span>'+
+    '</a>';
+  }).join('');
+}
+
+function toggleBookmarkEdit(){
+  var el=document.getElementById('bookmark-edit');
+  var showing=el.style.display!=='none';
+  el.style.display=showing?'none':'block';
+  if(!showing){
+    document.getElementById('bookmark-textarea').value=
+      bookmarkList.map(function(b){return b.name+','+b.url;}).join('\n');
+  }
+}
+
+function saveBookmarks(){
+  var lines=document.getElementById('bookmark-textarea').value.split('\n');
+  bookmarkList=lines.map(function(line){
+    var parts=line.split(',');
+    var name=parts[0]?parts[0].trim():'';
+    var url=parts.slice(1).join(',').trim();
+    if(!url.startsWith('http')) url='https://'+url;
+    return{name:name,url:url};
+  }).filter(function(b){return b.name&&b.url;});
+  document.getElementById('bookmark-edit').style.display='none';
+  renderBookmarks();
+  saveToCloud({bookmarks:bookmarkList});
+}
+
+renderBookmarks();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
+/* ══ 즐겨찾기 ══ */
+var DEFAULT_BOOKMARKS=[
+  {name:'나이스',url:'https://neis.go.kr'},
+  {name:'에듀넷',url:'https://edunet.net'},
+  {name:'학교알리미',url:'https://www.schoolinfo.go.kr'},
+  {name:'공공데이터포털',url:'https://data.go.kr'},
+];
+var bookmarkList=DEFAULT_BOOKMARKS.slice();
+
+function getFavicon(url){
+  try{var u=new URL(url);return'https://www.google.com/s2/favicons?domain='+u.hostname+'&sz=16';}
+  catch(e){return'';}
+}
+
+function renderBookmarks(){
+  var el=document.getElementById('bookmark-list');
+  if(!el)return;
+  if(!bookmarkList.length){
+    el.innerHTML='<div style="color:#ccc;font-size:12px;text-align:center;padding:12px;">✏️ 편집을 눌러 추가하세요</div>';
+    return;
+  }
+  el.innerHTML=bookmarkList.map(function(b){
+    return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<span class="bookmark-name">'+b.name+'</span>'+
+      '<span class="bookmark-arrow">↗</span>'+
+    '</a>';
+  }).join('');
+}
+
+function toggleBookmarkEdit(){
+  var el=document.getElementById('bookmark-edit');
+  var showing=el.style.display!=='none';
+  el.style.display=showing?'none':'block';
+  if(!showing){
+    document.getElementById('bookmark-textarea').value=
+      bookmarkList.map(function(b){return b.name+','+b.url;}).join('\n');
+  }
+}
+
+function saveBookmarks(){
+  var lines=document.getElementById('bookmark-textarea').value.split('\n');
+  bookmarkList=lines.map(function(line){
+    var parts=line.split(',');
+    var name=parts[0]?parts[0].trim():'';
+    var url=parts.slice(1).join(',').trim();
+    if(!url.startsWith('http')) url='https://'+url;
+    return{name:name,url:url};
+  }).filter(function(b){return b.name&&b.url;});
+  document.getElementById('bookmark-edit').style.display='none';
+  renderBookmarks();
+  saveToCloud({bookmarks:bookmarkList});
+}
+
+renderBookmarks();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8f8ec 0%,#f0fdf4 50%,#e0f2fe 100%);height:100vh;overflow:hidden;}
@@ -46,7 +214,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 .save-badge{font-size:10px;color:#6ee7a0;font-weight:600;display:none;position:absolute;top:4px;right:6px;}
 
 /* 테마 선택 카드 */
-.color-picker-wrap{display:flex;align-items:center;justify-content:center;height:100%;padding:4px;position:relative;}.color-current{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid rgba(255,255,255,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:transform .2s;flex-shrink:0;}.color-current:hover{transform:scale(1.1);}.color-palette{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);gap:8px;flex-direction:row;align-items:center;z-index:50;white-space:nowrap;}.color-palette.open{display:flex;}.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}.color-dot:hover{transform:scale(1.2);}.color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,0.2);}
+.color-picker-wrap{display:flex;align-items:center;justify-content:center;height:100%;padding:4px;position:relative;}.color-current{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid rgba(255,255,255,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:transform .2s;flex-shrink:0;}.color-current:hover{transform:scale(1.1);}.color-palette{gap:7px;}.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}.color-dot:hover{transform:scale(1.2);}.color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,0.2);}.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}.color-dot:hover{transform:scale(1.2);}.color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,0.2);}
 .color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0;}
 .color-dot:hover{transform:scale(1.2);}
 .color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,0.25);}
@@ -186,6 +354,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 .s-btn:hover{background:rgba(178,242,187,0.5);}
 .s-btn.minus:hover{background:rgba(255,200,200,0.4);color:#c62828;border-color:#ffaaaa;}
 
+
+/* 즐겨찾기 */
+.bookmark-item{display:flex;align-items:center;gap:6px;padding:5px 4px;border-bottom:0.5px solid rgba(178,242,187,0.25);text-decoration:none;}
+.bookmark-item:last-child{border-bottom:none;}
+.bookmark-item:hover{background:rgba(178,242,187,0.15);border-radius:6px;}
+.bookmark-favicon{width:14px;height:14px;border-radius:2px;flex-shrink:0;}
+.bookmark-name{font-size:13px;font-weight:600;color:#2d4a2d;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bookmark-arrow{font-size:10px;color:#aaa;}
 /* 명언 */
 #quote-text{font-size:17px;font-weight:600;color:#2d4a2d;line-height:1.7;margin-bottom:8px;text-align:center;}
 #quote-author{font-size:14px;color:#7aaa7a;font-weight:500;text-align:center;}
@@ -317,21 +493,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 
       <!-- 테마 색상 카드 -->
       <div class="card">
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;">
-          <div class="color-picker-wrap">
-            <!-- 현재 선택된 컬러만 표시 -->
-            <div class="color-current" id="color-current"
-                 style="background:linear-gradient(135deg,#b2f2bb,#6ee7a0);"
-                 onclick="togglePalette(event)"></div>
-            <!-- 팔레트 (숨김) -->
-            <div class="color-palette" id="color-palette">
-              <div class="color-dot active" id="dot-mint"     style="background:linear-gradient(135deg,#b2f2bb,#6ee7a0);" onclick="pickTheme('mint')"></div>
-              <div class="color-dot"        id="dot-sky"      style="background:linear-gradient(135deg,#bae6fd,#38bdf8);"  onclick="pickTheme('sky')"></div>
-              <div class="color-dot"        id="dot-peach"    style="background:linear-gradient(135deg,#fecdd3,#fb7185);"  onclick="pickTheme('peach')"></div>
-              <div class="color-dot"        id="dot-lavender" style="background:linear-gradient(135deg,#ddd6fe,#a78bfa);"  onclick="pickTheme('lavender')"></div>
-              <div class="color-dot"        id="dot-sun"      style="background:linear-gradient(135deg,#fef08a,#facc15);"  onclick="pickTheme('sun')"></div>
-              <div class="color-dot"        id="dot-orange"   style="background:linear-gradient(135deg,#fed7aa,#fb923c);"  onclick="pickTheme('orange')"></div>
-            </div>
+        <div class="user-card-inner" style="flex-direction:column;gap:7px;">
+          <button class="login-card-btn" onclick="togglePalette(event)" id="theme-btn">🎨 색상변경</button>
+          <div id="color-palette" style="display:none;flex-direction:row;gap:7px;justify-content:center;align-items:center;">
+            <div class="color-dot active" id="dot-mint"     style="background:linear-gradient(135deg,#b2f2bb,#6ee7a0);" onclick="pickTheme('mint')"></div>
+            <div class="color-dot"        id="dot-sky"      style="background:linear-gradient(135deg,#bae6fd,#38bdf8);"  onclick="pickTheme('sky')"></div>
+            <div class="color-dot"        id="dot-peach"    style="background:linear-gradient(135deg,#fecdd3,#fb7185);"  onclick="pickTheme('peach')"></div>
+            <div class="color-dot"        id="dot-lavender" style="background:linear-gradient(135deg,#ddd6fe,#a78bfa);"  onclick="pickTheme('lavender')"></div>
+            <div class="color-dot"        id="dot-sun"      style="background:linear-gradient(135deg,#fef08a,#facc15);"  onclick="pickTheme('sun')"></div>
           </div>
         </div>
       </div>
@@ -403,19 +572,38 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       </div>
     </div>
 
-    <!-- 칭찬 스티커 -->
-    <div class="card">
-      <div class="card-header" style="justify-content:space-between;">
-        <div class="card-title"><div class="card-icon">🏆</div>칭찬 스티커판</div>
-        <button class="small-btn" onclick="toggleStickerEdit()">⚙ 명단</button>
-      </div>
-      <div class="card-body" style="padding:6px 12px;">
-        <div class="sticker-grid" id="sticker-grid"></div>
-        <div id="sticker-edit" style="display:none;margin-top:6px;">
-          <textarea class="picker-textarea" id="sticker-textarea"></textarea>
-          <button class="picker-save-btn" onclick="saveStickerStudents()">저장</button>
+    <!-- 칭찬 스티커 + 즐겨찾기 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0;">
+
+      <!-- 칭찬 스티커 -->
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between;">
+          <div class="card-title"><div class="card-icon">🏆</div>칭찬 스티커판</div>
+          <button class="small-btn" onclick="toggleStickerEdit()">⚙ 명단</button>
+        </div>
+        <div class="card-body" style="padding:6px 12px;">
+          <div class="sticker-grid" id="sticker-grid"></div>
+          <div id="sticker-edit" style="display:none;margin-top:6px;">
+            <textarea class="picker-textarea" id="sticker-textarea"></textarea>
+            <button class="picker-save-btn" onclick="saveStickerStudents()">저장</button>
+          </div>
         </div>
       </div>
+
+      <!-- 즐겨찾기 -->
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between;">
+          <div class="card-title"><div class="card-icon">🔖</div>즐겨찾기</div>
+          <button class="small-btn" onclick="toggleBookmarkEdit()">✏️ 편집</button>
+        </div>
+        <div class="card-body" style="padding:6px 10px;" id="bookmark-list"></div>
+        <div id="bookmark-edit" style="display:none;padding:6px 10px;flex-shrink:0;border-top:0.5px solid rgba(178,242,187,0.3);">
+          <div style="font-size:10px;color:#aaa;margin-bottom:4px;">이름,URL 형식으로 한 줄에 하나씩</div>
+          <textarea class="picker-textarea" id="bookmark-textarea" style="height:80px;" placeholder="나이스,https://neis.go.kr&#10;에듀넷,https://edunet.net&#10;유튜브,https://youtube.com"></textarea>
+          <button class="picker-save-btn" onclick="saveBookmarks()">저장</button>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -498,6 +686,9 @@ function applyCloudData(data){
   renderSticker();
   /* 테마 */
   if(data.theme) setTheme(data.theme);
+  /* 즐겨찾기 */
+  bookmarkList=data.bookmarks||DEFAULT_BOOKMARKS;
+  renderBookmarks();
 }
 
 /* ══ 시계 ══ */
@@ -784,21 +975,19 @@ var THEME_GRADIENTS={
 function togglePalette(e){
   e.stopPropagation();
   var p=document.getElementById('color-palette');
-  p.classList.toggle('open');
+  var showing=p.style.display==='flex';
+  p.style.display=showing?'none':'flex';
+  var btn=document.getElementById('theme-btn');
+  if(btn) btn.textContent=showing?'🎨 색상변경':'✕ 닫기';
 }
 function pickTheme(name){
   setTheme(name);
-  document.getElementById('color-palette').classList.remove('open');
-  var cur=document.getElementById('color-current');
-  if(cur&&THEME_GRADIENTS[name]) cur.style.background=THEME_GRADIENTS[name];
+  document.getElementById('color-palette').style.display='none';
+  var btn=document.getElementById('theme-btn');
+  if(btn) btn.textContent='🎨 색상변경';
   document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('active');});
   var dot=document.getElementById('dot-'+name);if(dot)dot.classList.add('active');
 }
-/* 팔레트 외부 클릭 시 닫기 */
-document.addEventListener('click',function(){
-  var p=document.getElementById('color-palette');
-  if(p)p.classList.remove('open');
-});
 function setTheme(name){
   if(!THEMES[name])return;
   currentTheme=name;
@@ -832,6 +1021,62 @@ function setTheme(name){
   var dot=document.getElementById('dot-'+name);if(dot)dot.classList.add('active');
   if(currentUser)saveToCloud({theme:name});
 }
+
+/* ══ 즐겨찾기 ══ */
+var DEFAULT_BOOKMARKS=[
+  {name:'나이스',url:'https://neis.go.kr'},
+  {name:'에듀넷',url:'https://edunet.net'},
+  {name:'학교알리미',url:'https://www.schoolinfo.go.kr'},
+  {name:'공공데이터포털',url:'https://data.go.kr'},
+];
+var bookmarkList=DEFAULT_BOOKMARKS.slice();
+
+function getFavicon(url){
+  try{var u=new URL(url);return'https://www.google.com/s2/favicons?domain='+u.hostname+'&sz=16';}
+  catch(e){return'';}
+}
+
+function renderBookmarks(){
+  var el=document.getElementById('bookmark-list');
+  if(!el)return;
+  if(!bookmarkList.length){
+    el.innerHTML='<div style="color:#ccc;font-size:12px;text-align:center;padding:12px;">✏️ 편집을 눌러 추가하세요</div>';
+    return;
+  }
+  el.innerHTML=bookmarkList.map(function(b){
+    return '<a class="bookmark-item" href="'+b.url+'" target="_blank" rel="noopener">'+
+      '<img class="bookmark-favicon" src="'+getFavicon(b.url)+'" onerror="this.style.display='none'">'+
+      '<span class="bookmark-name">'+b.name+'</span>'+
+      '<span class="bookmark-arrow">↗</span>'+
+    '</a>';
+  }).join('');
+}
+
+function toggleBookmarkEdit(){
+  var el=document.getElementById('bookmark-edit');
+  var showing=el.style.display!=='none';
+  el.style.display=showing?'none':'block';
+  if(!showing){
+    document.getElementById('bookmark-textarea').value=
+      bookmarkList.map(function(b){return b.name+','+b.url;}).join('\n');
+  }
+}
+
+function saveBookmarks(){
+  var lines=document.getElementById('bookmark-textarea').value.split('\n');
+  bookmarkList=lines.map(function(line){
+    var parts=line.split(',');
+    var name=parts[0]?parts[0].trim():'';
+    var url=parts.slice(1).join(',').trim();
+    if(!url.startsWith('http')) url='https://'+url;
+    return{name:name,url:url};
+  }).filter(function(b){return b.name&&b.url;});
+  document.getElementById('bookmark-edit').style.display='none';
+  renderBookmarks();
+  saveToCloud({bookmarks:bookmarkList});
+}
+
+renderBookmarks();
 </script>
 </body>
 </html>
