@@ -179,9 +179,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 
 /* 칭찬 스티커 */
 .sticker-grid{display:flex;flex-direction:column;gap:5px;}
-.sticker-row{display:flex;align-items:center;gap:6px;padding:10px 8px;background:rgba(178,242,187,0.12);border:1px solid rgba(178,242,187,0.35);border-radius:12px;overflow:hidden;}
+.sticker-row{display:flex;align-items:center;gap:6px;padding:12px 8px;background:rgba(178,242,187,0.12);border:1px solid rgba(178,242,187,0.35);border-radius:12px;overflow:visible;}
 .sticker-name{font-size:14px;font-weight:700;color:#2d4a2d;width:55px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.sticker-stars{font-size:15px;letter-spacing:0;overflow:hidden;white-space:nowrap;min-width:0;flex:1;line-height:1;}
+.sticker-stars{font-size:16px;letter-spacing:1px;overflow:hidden;white-space:nowrap;min-width:0;flex:1;line-height:1.4;display:block;}
 .sticker-ctrl{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .sticker-num{font-size:13px;font-weight:700;color:#1a5c2a;min-width:24px;text-align:center;}
 .s-btn{width:24px;height:24px;border-radius:50%;border:1px solid rgba(178,242,187,0.7);background:rgba(255,255,255,0.7);cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;color:#2d6a2d;padding:0;font-family:inherit;flex-shrink:0;}
@@ -391,7 +391,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       </div>
       <div class="card">
         <div class="card-header" style="justify-content:space-between;">
-          <div class="card-title"><div class="card-icon">📋</div>오늘의 묘도 시간표</div>
+          <div class="card-title"><div class="card-icon">📋</div>묘도 행사</div>
           <button class="small-btn" onclick="loadTodaySchedule()">🔄</button>
         </div>
         <div class="card-body" id="today-sch" style="padding:8px 10px;"><div class="meal-loading">불러오는 중...</div></div>
@@ -685,9 +685,12 @@ showQuote();setInterval(newQuote,3600000);
 var stickerStudents=['학생1','학생2','학생3'],stickerData={};
 function starStr(n){
   if(n<=0) return '<span style="color:#e0e0e0;">○</span>';
+  var grid=document.getElementById('sticker-grid');
+  var availW=grid?Math.floor((grid.offsetWidth-160)/20):8;
+  var showMax=Math.max(1,Math.min(availW,n));
   var s='';
-  for(var i=0;i<Math.min(n,5);i++) s+='⭐';
-  if(n>5) s+='<span style="font-size:10px;color:#7aaa7a;"> +'+( n-5)+'</span>';
+  for(var i=0;i<showMax;i++) s+='⭐';
+  if(n>showMax) s+='<span style="font-size:14px;font-weight:700;color:#1a5c2a;margin-left:3px;">+'+(n-showMax)+'</span>';
   return s;
 }
 function renderSticker(){
@@ -785,23 +788,59 @@ function parseCSV(text){
   return rows;
 }
 function subjectBg(text){if(!text||!text.trim())return'';var t=text.trim();var map={'국어':'#e8f5e9','수학':'#e3f2fd','영어':'#fff8e1','과학':'#f3e5f5','사회':'#fce4ec','도덕':'#e0f7fa','체육':'#f1f8e9','음악':'#fce4ec','미술':'#fff3e0','실과':'#f1f8e9','창체':'#ede7f6','안전':'#fff3e0'};for(var k in map){if(t.indexOf(k)>=0)return map[k];}return'rgba(178,242,187,0.15)';}
+function findColByDate(dateRow,month,day){
+  for(var c=1;c<dateRow.length;c++){
+    var cell=dateRow[c].trim();
+    var m=cell.match(/(\d+)\s*월\s*(\d+)\s*일/);
+    if(m&&parseInt(m[1])===month&&parseInt(m[2])===day) return c;
+    var m2=cell.match(/^(\d+)\/(\d+)$/);
+    if(m2&&parseInt(m2[1])===month&&parseInt(m2[2])===day) return c;
+  }
+  return -1;
+}
+function renderDayCol(rows,colIdx){
+  if(colIdx<0) return '<div style="color:#ccc;font-size:11px;text-align:center;padding:8px 0;">정보없음</div>';
+  var h='';
+  for(var r=4;r<=9;r++){
+    var content=(rows[r]&&rows[r][colIdx]||'').trim();
+    var lines=content.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    h+='<div class="today-period">'
+      +'<span class="today-pnum">'+(r-3)+'교시</span>'
+      +'<span class="today-content" style="background:'+subjectBg(content)+'">'
+      +(lines.length?lines.join('<br>'):'<span style="color:#ddd;">—</span>')
+      +'</span></div>';
+  }
+  return h;
+}
 function loadTodaySchedule(){
-  var body=document.getElementById('today-sch');if(body)body.innerHTML='<div class="meal-loading">불러오는 중...</div>';
+  var body=document.getElementById('today-sch');
+  if(body) body.innerHTML='<div class="meal-loading">불러오는 중...</div>';
   fetch(CF_PROXY+'/sheets?url='+encodeURIComponent(SHEET_CSV))
-    .then(function(r){return r.text();}).then(function(text){
-      var rows=parseCSV(text),dateRow=rows[2]||[],today=new Date(),todayDay=today.getDate(),todayMonth=today.getMonth()+1,colIdx=-1;
-      for(var c=1;c<dateRow.length;c++){
-        var cell=dateRow[c].trim();
-        var m=cell.match(/(\d+)\s*월\s*(\d+)\s*일/);
-        if(m&&parseInt(m[1])===todayMonth&&parseInt(m[2])===todayDay){colIdx=c;break;}
-        var m2=cell.match(/^(\d+)\/(\d+)$/);
-        if(m2&&parseInt(m2[1])===todayMonth&&parseInt(m2[2])===todayDay){colIdx=c;break;}
-      }
-      if(colIdx<0){if(body)body.innerHTML='<div style="color:#e57373;font-size:12px;text-align:center;padding:10px;">오늘 날짜를 찾을 수 없습니다</div>';return;}
-      var html='';
-      for(var r=4;r<=9;r++){var rowData=rows[r]||[],content=(rowData[colIdx]||'').trim(),lines=content.split('\n').map(function(s){return s.trim();}).filter(Boolean);html+='<div class="today-period"><span class="today-pnum">'+(r-3)+'교시</span><span class="today-content" style="background:'+subjectBg(content)+'">'+(lines.length?lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></div>';}
-      if(body)body.innerHTML=html||'<div class="meal-loading">데이터 없음</div>';
-    }).catch(function(e){console.warn('[시간표]',e);if(body)body.innerHTML='<div style="color:#e57373;font-size:12px;text-align:center;padding:10px;">불러올 수 없습니다</div>';});
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var rows=parseCSV(text), dateRow=rows[2]||[];
+      var today=new Date(), tomorrow=new Date(today);
+      tomorrow.setDate(today.getDate()+1);
+      var DAYS=['일','월','화','수','목','금','토'];
+      var tCol=findColByDate(dateRow,today.getMonth()+1,today.getDate());
+      var tmCol=findColByDate(dateRow,tomorrow.getMonth()+1,tomorrow.getDate());
+      var html=
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">'
+          +'<div>'
+            +'<div style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:2px 0 4px;border-bottom:1.5px solid rgba(178,242,187,0.5);margin-bottom:2px;">📅 오늘 ('+DAYS[today.getDay()]+')</div>'
+            +renderDayCol(rows,tCol)
+          +'</div>'
+          +'<div>'
+            +'<div style="font-size:11px;font-weight:700;color:#4a7a4a;text-align:center;padding:2px 0 4px;border-bottom:1.5px solid rgba(178,242,187,0.3);margin-bottom:2px;">📅 내일 ('+DAYS[tomorrow.getDay()]+')</div>'
+            +renderDayCol(rows,tmCol)
+          +'</div>'
+        +'</div>';
+      if(body) body.innerHTML=html;
+    })
+    .catch(function(e){
+      console.warn('[시간표]',e);
+      if(body) body.innerHTML='<div style="color:#e57373;font-size:12px;text-align:center;padding:10px;">불러올 수 없습니다</div>';
+    });
 }
 loadTodaySchedule();setInterval(loadTodaySchedule,3600000);
 
@@ -864,7 +903,7 @@ function setTheme(name){
     +'.account-btn:hover{background:linear-gradient(135deg,'+t.c1+','+t.c2+') !important;}'
     +'.meal-dot{background:'+t.c2+' !important;}'
     +'.meal-date-badge{background:'+t.c1+'66 !important;color:'+t.c6+' !important;}'
-    +'.sticker-row{display:flex;align-items:center;gap:6px;padding:10px 8px;background:rgba(178,242,187,0.12);border:1px solid rgba(178,242,187,0.35);border-radius:12px;overflow:hidden;}'
+    +'.sticker-row{display:flex;align-items:center;gap:6px;padding:12px 8px;background:rgba(178,242,187,0.12);border:1px solid rgba(178,242,187,0.35);border-radius:12px;overflow:visible;}'
     +'.dday-item{background:'+t.c1+'22 !important;border-color:'+t.c1+'50 !important;}'
     +'.s-btn{border-color:'+t.c1+'b0 !important;color:'+t.c7+' !important;}'
     +'.mcal-cell.today{background:linear-gradient(135deg,'+t.c1+','+t.c2+') !important;}'
