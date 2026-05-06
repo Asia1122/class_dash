@@ -379,6 +379,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 </style>
 </head>
 <body>
+
+<!-- 사용설명서 모달 -->
+<div id="manual-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.97);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,0.18);padding:32px 36px;max-width:500px;width:90%;max-height:82vh;overflow-y:auto;position:relative;">
+    <button onclick="closeManual()" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;">✕</button>
+    <div style="font-size:26px;text-align:center;margin-bottom:6px;">📖</div>
+    <div style="font-size:19px;font-weight:700;color:#1a5c2a;text-align:center;margin-bottom:18px;">학급 대시보드 사용설명서</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:#2d4a2d;line-height:1.7;">
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🕐 현재 시각</b><br>실시간 시계와 날짜, 요일을 표시합니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🍱 오늘의 급식</b><br>나이스(NEIS) API로 오늘 급식 메뉴를 자동으로 불러옵니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>📋 묘도 행사</b><br>구글 스프레드시트와 연동하여 오늘·내일 시간표를 1시간마다 자동 갱신합니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>⏱ 수업 타이머</b><br>+버튼으로 시간을 추가하고 ▶ 시작을 누르세요. 종료 시 알림음이 울립니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🎲 랜덤 발표자</b><br>⚙ 명단 버튼으로 학생 이름을 등록한 뒤 뽑기 버튼을 누르세요.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>📚 우리 반 시간표</b><br>✏️ 편집 버튼으로 직접 입력하고 💾 저장하세요. 로그인 시 클라우드에 저장됩니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🏆 칭찬 스티커판</b><br>⚙ 명단에서 학생 등록, +/- 버튼으로 스티커를 조절합니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🌡️ 학급 온도계</b><br>학급 분위기를 0~100도로 표현합니다. ↺ 버튼으로 초기화합니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>👤 로그인</b><br>구글 계정으로 로그인하면 모든 설정이 클라우드에 저장됩니다.</div>
+      <div style="background:rgba(178,242,187,0.15);border-radius:10px;padding:10px 14px;"><b>🌤 여수 날씨</b><br>기상청 API로 묘도동 현재 날씨와 삼일동 미세먼지를 10분마다 갱신합니다.</div>
+    </div>
+    <button onclick="closeManual()" style="width:100%;margin-top:16px;padding:10px;background:linear-gradient(135deg,#b2f2bb,#6ee7a0);border:none;border-radius:12px;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;color:#1a5c2a;cursor:pointer;">닫기</button>
+  </div>
+</div>
 <div id="dashboard">
 
   <!-- 왼쪽 -->
@@ -502,15 +524,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       <!-- 사용설명서 카드 -->
       <div class="card">
         <div class="user-card-inner">
-          <button class="login-card-btn" onclick="openManual()">📖 사용설명서</button>
+          <button class="account-btn" onclick="openManual()">📖 사용설명서</button>
         </div>
       </div>
       <!-- 만든이 카드 -->
       <div class="card">
-        <div class="user-card-inner" style="flex-direction:column;gap:3px;">
-          <div style="font-size:16px;">✏️</div>
-          <div style="font-size:11px;color:#7aaa7a;font-weight:500;">만든이</div>
-          <div style="font-size:14px;font-weight:700;color:#1a5c2a;">두쌤</div>
+        <div class="user-card-inner">
+          <button class="account-btn" style="flex-direction:column;gap:2px;padding:6px 8px;" onclick="">
+            <span style="font-size:11px;opacity:0.7;">만든이</span>
+            <span style="font-size:14px;">✏️ 두쌤</span>
+          </button>
         </div>
       </div>
 
@@ -593,7 +616,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
           <div class="card-title"><div class="card-icon">🏆</div>칭찬 스티커판</div>
           <div style="display:flex;gap:4px;">
             <button class="small-btn" onclick="toggleStickerEdit()">⚙ 명단</button>
-            <button class="small-btn" onclick="resetStickerScores()" style="color:#e57373;">↺ 초기화</button>
+            <button class="small-btn" onclick="resetStickerScores()">↺ 초기화</button>
           </div>
         </div>
         <div class="card-body" style="padding:6px 12px;">
@@ -609,7 +632,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       <div class="card">
         <div class="card-header" style="justify-content:space-between;">
           <div class="card-title"><div class="card-icon">🌡️</div>학급 온도계</div>
-          <button class="small-btn" onclick="resetThermo()" style="color:#e57373;">↺</button>
+          <button class="small-btn" onclick="resetThermo()">↺</button>
         </div>
         <div class="card-body" style="padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;">
           <!-- SVG 온도계 -->
