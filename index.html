@@ -14,15 +14,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 
 /* 그리드 */
 #dashboard{display:grid;grid-template-columns:3fr 3.5fr 3.5fr;gap:10px;padding:10px;height:100vh;box-sizing:border-box;}
-#col-left{display:grid;grid-template-rows:1fr 300px auto 1fr;gap:10px;min-height:0;}
+#col-left{display:grid;grid-template-rows:1fr 300px 1fr;gap:10px;min-height:0;}
 #col-mid{display:grid;grid-template-rows:auto 1fr 2fr;gap:10px;min-height:0;}
 #col-right{display:grid;grid-template-rows:auto auto 1fr;gap:10px;min-height:0;}
 
 /* 카드 */
 .card{background:rgba(255,255,255,0.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(178,242,187,0.5);border-radius:20px;box-shadow:0 8px 32px rgba(34,139,34,0.10),0 2px 8px rgba(0,0,0,0.05);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 8px;background:linear-gradient(135deg,rgba(178,242,187,0.38),rgba(144,238,160,0.18));border-bottom:1px solid rgba(178,242,187,0.38);flex-shrink:0;}
-.card-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:#1a5c2a;}
-.card-icon{width:24px;height:24px;background:linear-gradient(135deg,#b2f2bb,#6ee7a0);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.card-title{display:flex;align-items:center;gap:7px;font-size:17px;font-weight:700;color:#1a5c2a;}
+.card-icon{width:27px;height:27px;background:linear-gradient(135deg,#b2f2bb,#6ee7a0);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .card-body{flex:1;overflow:auto;padding:10px 14px;min-height:0;}
 .card-body::-webkit-scrollbar{width:3px;}
 .card-body::-webkit-scrollbar-thumb{background:rgba(178,242,187,0.6);border-radius:2px;}
@@ -163,8 +163,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 .clock-day{display:inline-block;background:linear-gradient(135deg,#b2f2bb,#6ee7a0);color:#1a5c2a;font-size:15px;font-weight:700;padding:3px 13px;border-radius:20px;}
 
 /* 급식 */
-.meal-date-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(178,242,187,0.4);color:#2d6a2d;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:7px;}
-.meal-item{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:14px;color:#2d4a2d;border-bottom:0.5px solid rgba(178,242,187,0.3);}
+.meal-date-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(178,242,187,0.4);color:#2d6a2d;font-size:13px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
+.meal-item{display:flex;align-items:flex-start;gap:6px;padding:4px 0;font-size:16px;color:#2d4a2d;border-bottom:0.5px solid rgba(178,242,187,0.3);}
 .meal-item:last-child{border-bottom:none;}
 .meal-dot{width:6px;height:6px;background:#6ee7a0;border-radius:50%;margin-top:4px;flex-shrink:0;}
 .meal-loading{text-align:center;padding:10px;color:#7aaa7a;font-size:13px;}
@@ -174,14 +174,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 /* 오늘 시간표 */
 .today-period{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid rgba(178,242,187,0.25);}
 .today-period:last-child{border-bottom:none;}
-.today-pnum{font-size:11px;font-weight:700;color:#1a5c2a;min-width:32px;flex-shrink:0;}
-.today-content{flex:1;font-size:12px;color:#2d4a2d;padding:2px 7px;border-radius:6px;line-height:1.5;}
+.today-pnum{font-size:13px;font-weight:700;color:#1a5c2a;min-width:36px;flex-shrink:0;}
+.today-content{flex:1;font-size:14px;color:#2d4a2d;padding:2px 6px;border-radius:6px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* 칭찬 스티커 */
 .sticker-grid{display:flex;flex-direction:column;gap:5px;}
 .sticker-row{display:flex;align-items:center;gap:6px;padding:10px 8px;background:rgba(178,242,187,0.12);border:1px solid rgba(178,242,187,0.35);border-radius:12px;overflow:hidden;}
 .sticker-name{font-size:14px;font-weight:700;color:#2d4a2d;width:55px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.sticker-stars{font-size:13px;letter-spacing:1px;overflow:hidden;white-space:nowrap;min-width:0;flex:1;}
+.sticker-stars{font-size:15px;letter-spacing:0;overflow:hidden;white-space:nowrap;min-width:0;flex:1;line-height:1;}
 .sticker-ctrl{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .sticker-num{font-size:13px;font-weight:700;color:#1a5c2a;min-width:24px;text-align:center;}
 .s-btn{width:24px;height:24px;border-radius:50%;border:1px solid rgba(178,242,187,0.7);background:rgba(255,255,255,0.7);cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;color:#2d6a2d;padding:0;font-family:inherit;flex-shrink:0;}
