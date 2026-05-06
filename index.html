@@ -175,7 +175,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 .today-period{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid rgba(178,242,187,0.25);}
 .today-period:last-child{border-bottom:none;}
 .today-pnum{font-size:13px;font-weight:700;color:#1a5c2a;min-width:36px;flex-shrink:0;}
-.today-content{flex:1;font-size:14px;color:#2d4a2d;padding:2px 6px;border-radius:6px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.today-content{flex:1;font-size:14px;color:#2d4a2d;padding:3px 6px;border-radius:6px;line-height:1.4;overflow:hidden;display:block;min-height:2.8em;}
 
 /* 칭찬 스티커 */
 .sticker-grid{display:flex;flex-direction:column;gap:5px;}
@@ -698,7 +698,7 @@ function starStr(n){
   var red=Math.floor(n/10);   /* 빨간별 개수 */
   var yellow=n%10;             /* 노란별 개수 */
   var s='';
-  for(var i=0;i<red;i++)    s+='<span style="font-size:18px;">🔴</span>';
+  for(var i=0;i<red;i++)    s+='<span style="font-size:18px;filter:hue-rotate(300deg) saturate(5) brightness(0.9);">⭐</span>';
   for(var i=0;i<yellow;i++) s+='<span style="font-size:18px;">⭐</span>';
   return s||'<span style="color:#e0e0e0;font-size:18px;">○</span>';
 }
@@ -842,8 +842,8 @@ function loadTodaySchedule(){
         var mc=tmCells[i]||{content:'',lines:[]};
         html+='<tr>'
           +'<td style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:4px 2px;white-space:nowrap;">'+(i+1)+'교시</td>'
-          +'<td style="padding:3px 2px;"><span class="today-content" style="background:'+subjectBg(tc.content)+';display:block;">'+(tc.lines.length?tc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
-          +'<td style="padding:3px 2px;"><span class="today-content" style="background:'+subjectBg(mc.content)+';display:block;">'+(mc.lines.length?mc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
+          +'<td style="padding:3px 2px;vertical-align:top;"><span class="today-content" style="background:'+subjectBg(tc.content)+';display:block;">'+(tc.lines.length?tc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
+          +'<td style="padding:3px 2px;vertical-align:top;"><span class="today-content" style="background:'+subjectBg(mc.content)+';display:block;">'+(mc.lines.length?mc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
         +'</tr>';
       }
       html+='</tbody></table>';
