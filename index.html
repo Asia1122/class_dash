@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
 /* ══ 학급 온도계 ══ */
 var classTemp = 0;
+var thermoAuto = false;
 function updateThermo(){
   var val = Math.max(0, Math.min(100, classTemp));
   document.getElementById('thermo-val').textContent = val + '°';
@@ -37,15 +38,54 @@ function updateThermo(){
   }
 }
 function changeTemp(delta){
+  if(thermoAuto) return;
   classTemp = Math.max(0, Math.min(100, classTemp + delta));
   updateThermo();
   saveToCloud({classTemp: classTemp});
+}
+function toggleThermoSetting(){
+  var p=document.getElementById('thermo-setting');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+function toggleThermoAuto(){
+  thermoAuto=document.getElementById('thermo-auto').checked;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display=thermoAuto?'none':'flex';
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({thermoAuto:thermoAuto});
+}
+function calcThermoFromStickers(){
+  /* 학생 점수 합산 → 최대값 기준으로 0~100 환산 */
+  var total=0;
+  stickerStudents.forEach(function(name){ total+=(stickerData[name]||0); });
+  var max=stickerStudents.length*20; /* 학생당 최대 20점 기준 */
+  classTemp=Math.min(100,Math.round(total/Math.max(max,1)*100));
+  updateThermo();
+}
+function resetThermo(){
+  if(!confirm('온도를 0으로 초기화할까요?')) return;
+  classTemp=0;
+  thermoAuto=false;
+  var chk=document.getElementById('thermo-auto');
+  if(chk) chk.checked=false;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display='flex';
+  updateThermo();
+  saveToCloud({classTemp:0,thermoAuto:false});
+}
+function resetStickerScores(){
+  if(!confirm('모든 학생의 점수를 초기화할까요?')) return;
+  stickerData={};
+  renderSticker();
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({stickerData:{}});
 }
 updateThermo();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js">
 /* ══ 학급 온도계 ══ */
 var classTemp = 0;
+var thermoAuto = false;
 function updateThermo(){
   var val = Math.max(0, Math.min(100, classTemp));
   document.getElementById('thermo-val').textContent = val + '°';
@@ -75,15 +115,54 @@ function updateThermo(){
   }
 }
 function changeTemp(delta){
+  if(thermoAuto) return;
   classTemp = Math.max(0, Math.min(100, classTemp + delta));
   updateThermo();
   saveToCloud({classTemp: classTemp});
+}
+function toggleThermoSetting(){
+  var p=document.getElementById('thermo-setting');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+function toggleThermoAuto(){
+  thermoAuto=document.getElementById('thermo-auto').checked;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display=thermoAuto?'none':'flex';
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({thermoAuto:thermoAuto});
+}
+function calcThermoFromStickers(){
+  /* 학생 점수 합산 → 최대값 기준으로 0~100 환산 */
+  var total=0;
+  stickerStudents.forEach(function(name){ total+=(stickerData[name]||0); });
+  var max=stickerStudents.length*20; /* 학생당 최대 20점 기준 */
+  classTemp=Math.min(100,Math.round(total/Math.max(max,1)*100));
+  updateThermo();
+}
+function resetThermo(){
+  if(!confirm('온도를 0으로 초기화할까요?')) return;
+  classTemp=0;
+  thermoAuto=false;
+  var chk=document.getElementById('thermo-auto');
+  if(chk) chk.checked=false;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display='flex';
+  updateThermo();
+  saveToCloud({classTemp:0,thermoAuto:false});
+}
+function resetStickerScores(){
+  if(!confirm('모든 학생의 점수를 초기화할까요?')) return;
+  stickerData={};
+  renderSticker();
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({stickerData:{}});
 }
 updateThermo();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
 /* ══ 학급 온도계 ══ */
 var classTemp = 0;
+var thermoAuto = false;
 function updateThermo(){
   var val = Math.max(0, Math.min(100, classTemp));
   document.getElementById('thermo-val').textContent = val + '°';
@@ -113,9 +192,47 @@ function updateThermo(){
   }
 }
 function changeTemp(delta){
+  if(thermoAuto) return;
   classTemp = Math.max(0, Math.min(100, classTemp + delta));
   updateThermo();
   saveToCloud({classTemp: classTemp});
+}
+function toggleThermoSetting(){
+  var p=document.getElementById('thermo-setting');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+function toggleThermoAuto(){
+  thermoAuto=document.getElementById('thermo-auto').checked;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display=thermoAuto?'none':'flex';
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({thermoAuto:thermoAuto});
+}
+function calcThermoFromStickers(){
+  /* 학생 점수 합산 → 최대값 기준으로 0~100 환산 */
+  var total=0;
+  stickerStudents.forEach(function(name){ total+=(stickerData[name]||0); });
+  var max=stickerStudents.length*20; /* 학생당 최대 20점 기준 */
+  classTemp=Math.min(100,Math.round(total/Math.max(max,1)*100));
+  updateThermo();
+}
+function resetThermo(){
+  if(!confirm('온도를 0으로 초기화할까요?')) return;
+  classTemp=0;
+  thermoAuto=false;
+  var chk=document.getElementById('thermo-auto');
+  if(chk) chk.checked=false;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display='flex';
+  updateThermo();
+  saveToCloud({classTemp:0,thermoAuto:false});
+}
+function resetStickerScores(){
+  if(!confirm('모든 학생의 점수를 초기화할까요?')) return;
+  stickerData={};
+  renderSticker();
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({stickerData:{}});
 }
 updateThermo();
 </script>
@@ -510,27 +627,37 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
     </div>
 
     <!-- 칭찬 스티커 60% + 학급 온도계 40% -->
-    <div style="display:grid;grid-template-columns:6fr 4fr;gap:10px;min-height:0;">
+    <div style="display:grid;grid-template-columns:8fr 2fr;gap:10px;min-height:0;">
 
       <!-- 칭찬 스티커 -->
       <div class="card">
         <div class="card-header" style="justify-content:space-between;">
           <div class="card-title"><div class="card-icon">🏆</div>칭찬 스티커판</div>
-          <button class="small-btn" onclick="toggleStickerEdit()">⚙ 명단</button>
+          <button class="small-btn" onclick="toggleStickerEdit()">⚙ 설정</button>
         </div>
         <div class="card-body" style="padding:6px 12px;">
           <div class="sticker-grid" id="sticker-grid"></div>
           <div id="sticker-edit" style="display:none;margin-top:6px;">
             <textarea class="picker-textarea" id="sticker-textarea"></textarea>
             <button class="picker-save-btn" onclick="saveStickerStudents()">저장</button>
+            <button class="picker-save-btn" onclick="resetStickerScores()" style="margin-top:4px;background:rgba(255,200,200,0.4);border:1px solid rgba(255,150,150,0.4);color:#c62828;">점수 초기화</button>
           </div>
         </div>
       </div>
 
       <!-- 학급 온도계 -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="justify-content:space-between;">
           <div class="card-title"><div class="card-icon">🌡️</div>학급 온도계</div>
+          <button class="small-btn" onclick="toggleThermoSetting()">⚙</button>
+        </div>
+        <!-- 설정 패널 -->
+        <div id="thermo-setting" style="display:none;padding:6px 10px;border-bottom:0.5px solid rgba(178,242,187,0.3);flex-shrink:0;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#2d4a2d;cursor:pointer;margin-bottom:6px;">
+            <input type="checkbox" id="thermo-auto" onchange="toggleThermoAuto()" style="width:14px;height:14px;accent-color:#6ee7a0;">
+            학생 개인 점수 합산
+          </label>
+          <button class="picker-save-btn" onclick="resetThermo()" style="width:100%;background:rgba(255,200,200,0.4);border:1px solid rgba(255,150,150,0.4);color:#c62828;font-size:11px;padding:4px;">온도 초기화</button>
         </div>
         <div class="card-body" style="padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;">
           <!-- SVG 온도계 -->
@@ -575,7 +702,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
             </svg>
           </div>
           <!-- 온도 수치 + 버튼 -->
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:4px;">
+          <div id="thermo-ctrl" style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:4px;">
             <button class="s-btn minus" onclick="changeTemp(-1)" style="width:30px;height:30px;font-size:18px;">−</button>
             <span id="thermo-val" style="font-size:20px;font-weight:700;color:#1a5c2a;min-width:48px;text-align:center;">0°</span>
             <button class="s-btn" onclick="changeTemp(1)" style="width:30px;height:30px;font-size:18px;">+</button>
@@ -888,7 +1015,7 @@ function renderSticker(){
     +'</div>';
   }).join('');
 }
-function changeSticker(name,delta){stickerData[name]=(stickerData[name]||0)+delta;if(stickerData[name]<0)stickerData[name]=0;renderSticker();saveToCloud({stickerData:stickerData});}
+function changeSticker(name,delta){stickerData[name]=(stickerData[name]||0)+delta;if(stickerData[name]<0)stickerData[name]=0;renderSticker();if(thermoAuto) calcThermoFromStickers();saveToCloud({stickerData:stickerData});}
 function toggleStickerEdit(){var el=document.getElementById('sticker-edit');var show=el.style.display!=='none';el.style.display=show?'none':'block';if(!show)document.getElementById('sticker-textarea').value=stickerStudents.join('\n');}
 function saveStickerStudents(){stickerStudents=document.getElementById('sticker-textarea').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);document.getElementById('sticker-edit').style.display='none';renderSticker();saveToCloud({stickerStudents:stickerStudents});}
 renderSticker();
@@ -1120,6 +1247,7 @@ function pickTheme(name){
 
 /* ══ 학급 온도계 ══ */
 var classTemp = 0;
+var thermoAuto = false;
 function updateThermo(){
   var val = Math.max(0, Math.min(100, classTemp));
   document.getElementById('thermo-val').textContent = val + '°';
@@ -1149,9 +1277,47 @@ function updateThermo(){
   }
 }
 function changeTemp(delta){
+  if(thermoAuto) return;
   classTemp = Math.max(0, Math.min(100, classTemp + delta));
   updateThermo();
   saveToCloud({classTemp: classTemp});
+}
+function toggleThermoSetting(){
+  var p=document.getElementById('thermo-setting');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+function toggleThermoAuto(){
+  thermoAuto=document.getElementById('thermo-auto').checked;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display=thermoAuto?'none':'flex';
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({thermoAuto:thermoAuto});
+}
+function calcThermoFromStickers(){
+  /* 학생 점수 합산 → 최대값 기준으로 0~100 환산 */
+  var total=0;
+  stickerStudents.forEach(function(name){ total+=(stickerData[name]||0); });
+  var max=stickerStudents.length*20; /* 학생당 최대 20점 기준 */
+  classTemp=Math.min(100,Math.round(total/Math.max(max,1)*100));
+  updateThermo();
+}
+function resetThermo(){
+  if(!confirm('온도를 0으로 초기화할까요?')) return;
+  classTemp=0;
+  thermoAuto=false;
+  var chk=document.getElementById('thermo-auto');
+  if(chk) chk.checked=false;
+  var ctrl=document.getElementById('thermo-ctrl');
+  if(ctrl) ctrl.style.display='flex';
+  updateThermo();
+  saveToCloud({classTemp:0,thermoAuto:false});
+}
+function resetStickerScores(){
+  if(!confirm('모든 학생의 점수를 초기화할까요?')) return;
+  stickerData={};
+  renderSticker();
+  if(thermoAuto) calcThermoFromStickers();
+  saveToCloud({stickerData:{}});
 }
 updateThermo();
 </script>
