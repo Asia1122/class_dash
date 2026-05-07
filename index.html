@@ -188,9 +188,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 
 /* 그리드 */
 #dashboard{display:grid;grid-template-columns:3fr 3.5fr 3.5fr;gap:10px;padding:10px;height:100vh;box-sizing:border-box;}
-#col-left{display:grid;grid-template-rows:1fr 300px 1fr;gap:10px;min-height:0;}
+#col-left{display:grid;grid-template-rows:1fr 270px minmax(0,1fr);gap:10px;min-height:0;}
 #col-mid{display:grid;grid-template-rows:auto 1fr 2fr;gap:10px;min-height:0;}
-#col-right{display:grid;grid-template-rows:auto auto 1fr;gap:10px;min-height:0;}
+#col-right{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:10px;min-height:0;}
 
 /* 카드 */
 .card{background:rgba(255,255,255,0.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(178,242,187,0.5);border-radius:20px;box-shadow:0 8px 32px rgba(34,139,34,0.10),0 2px 8px rgba(0,0,0,0.05);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
