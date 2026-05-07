@@ -1025,14 +1025,14 @@ document.getElementById('memo-area').addEventListener('input',function(){documen
 window.addEventListener('load',buildMemoLines);window.addEventListener('resize',buildMemoLines);
 
 /* ══ 날씨 ══ */
-var CF_PROXY='https://winter-rain-26c0.ayabako.workers.dev';
+/* CF_PROXY 제거 — GitHub Pages에서 직접 호출 */
 var DATA_KEY='tpy66qboqijydDFDAYNdK8OzMDoWXKY5TYmXQIdluu7qFm1/2QhiH8Mto/kcMDFNrq48xhlddt648rX3rvw4lg==';
 function getBaseTime(){var now=new Date(),kst=new Date(now.getTime()+(9*60*60*1000));if(kst.getUTCMinutes()<10)kst.setUTCHours(kst.getUTCHours()-1);return{date:kst.getUTCFullYear()+String(kst.getUTCMonth()+1).padStart(2,'0')+String(kst.getUTCDate()).padStart(2,'0'),time:String(kst.getUTCHours()).padStart(2,'00')+'00'};}
 function ptyIcon(pty){if(pty==='1')return{icon:'🌧️',desc:'비'};if(pty==='2')return{icon:'🌨️',desc:'비/눈'};if(pty==='3')return{icon:'❄️',desc:'눈'};if(pty==='4')return{icon:'🌦️',desc:'소나기'};var h=new Date(new Date().getTime()+(9*60*60*1000)).getUTCHours();return h>=6&&h<18?{icon:'☀️',desc:'맑음'}:{icon:'🌙',desc:'맑음'};}
 function pmGrade(val){if(!val||val==='-')return{txt:'정보없음',cls:''};var v=parseInt(val);if(v<=30)return{txt:'좋음 ('+v+'㎍)',cls:'pm-good'};if(v<=80)return{txt:'보통 ('+v+'㎍)',cls:'pm-normal'};if(v<=150)return{txt:'나쁨 ('+v+'㎍)',cls:'pm-bad'};return{txt:'매우나쁨 ('+v+'㎍)',cls:'pm-very-bad'};}
 function loadWeather(){
   var bt=getBaseTime();
-  fetch(CF_PROXY+'/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?serviceKey='+encodeURIComponent(DATA_KEY)+'&numOfRows=10&pageNo=1&dataType=JSON&base_date='+bt.date+'&base_time='+bt.time+'&nx=74&ny=66')
+  fetch('https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?serviceKey='+encodeURIComponent(DATA_KEY)+'&numOfRows=10&pageNo=1&dataType=JSON&base_date='+bt.date+'&base_time='+bt.time+'&nx=74&ny=66')
     .then(function(r){return r.json();}).then(function(data){
       var body=data.response&&data.response.body;if(!body||!body.items)throw new Error('no data');
       var v={};body.items.item.forEach(function(i){v[i.category]=i.obsrValue;});
@@ -1044,7 +1044,7 @@ function loadWeather(){
     }).catch(function(){document.getElementById('weather-body').innerHTML='<div class="weather-loading">날씨 정보를 불러올 수 없습니다</div>';});
 }
 function loadAirQuality(){
-  fetch(CF_PROXY+'/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?serviceKey='+encodeURIComponent(DATA_KEY)+'&returnType=json&numOfRows=1&pageNo=1&stationName='+encodeURIComponent('삼일동')+'&dataTerm=DAILY&ver=1.0')
+  fetch('https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?serviceKey='+encodeURIComponent(DATA_KEY)+'&returnType=json&numOfRows=1&pageNo=1&stationName='+encodeURIComponent('삼일동')+'&dataTerm=DAILY&ver=1.0')
     .then(function(r){return r.json();}).then(function(data){
       var items=data.response&&data.response.body&&data.response.body.items;if(!items||!items[0])return;
       var item=items[0],g10=pmGrade(item.pm10Value),g25=pmGrade(item.pm25Value);
@@ -1091,7 +1091,7 @@ function renderDayCol(rows,colIdx){
 function loadTodaySchedule(){
   var body=document.getElementById('today-sch');
   if(body) body.innerHTML='<div class="meal-loading">불러오는 중...</div>';
-  fetch(CF_PROXY+'/sheets?url='+encodeURIComponent(SHEET_CSV))
+  fetch(SHEET_CSV)
     .then(function(r){return r.text();})
     .then(function(text){
       var rows=parseCSV(text), dateRow=rows[2]||[];
