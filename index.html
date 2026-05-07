@@ -413,16 +413,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       </div>
       <div class="card">
         <div class="card-header" style="justify-content:space-between;">
-          <div class="card-title"><div class="card-icon">✏️</div>메모장</div>
-          <button class="small-btn" onclick="clearMemo()">🗑</button>
+          <div class="card-title"><div class="card-icon">📋</div>묘도 행사</div>
+          <button class="small-btn" onclick="loadTodaySchedule()">🔄</button>
         </div>
-        <div style="flex:1;position:relative;overflow:hidden;">
-          <div id="memo-lines" style="position:absolute;inset:8px 12px;pointer-events:none;overflow:hidden;"></div>
-          <textarea id="memo-area" class="memo-area" style="position:relative;z-index:1;width:100%;height:100%;padding:8px 12px;" placeholder="알림, 공지, 과제..."></textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;padding:3px 12px 6px;flex-shrink:0;">
-          <span id="memo-counter" style="font-size:10px;color:#aaccaa;">0자</span>
-        </div>
+        <div class="card-body" id="today-sch" style="padding:8px 10px;"><div class="meal-loading">불러오는 중...</div></div>
       </div>
     </div>
     <!-- D-Day -->
@@ -588,23 +582,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0;">
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><div class="card-icon">🍱</div>오늘의 급식<span id="meal-status-badge"></span></div>
+          <div class="card-title"><div class="card-icon">🍱</div>오늘의 급식</div>
         </div>
         <div class="card-body">
-          <div class="meal-date-badge">📅 <span id="meal-date"></span></div>
-          <div id="meal-list"><div class="meal-loading">불러오는 중...</div></div>
+<div id="meal-list"><div class="meal-loading">불러오는 중...</div></div>
         </div>
       </div>
       <div class="card">
         <div class="card-header" style="justify-content:space-between;">
-          <div class="card-title"><div class="card-icon">📋</div>묘도 행사</div>
-          <button class="small-btn" onclick="loadTodaySchedule()">🔄</button>
+          <div class="card-title"><div class="card-icon">✏️</div>메모장</div>
+          <button class="small-btn" onclick="clearMemo()">🗑</button>
         </div>
-        <div class="card-body" id="today-sch" style="padding:8px 10px;"><div class="meal-loading">불러오는 중...</div></div>
+        <div style="flex:1;position:relative;overflow:hidden;">
+          <div id="memo-lines" style="position:absolute;inset:8px 12px;pointer-events:none;overflow:hidden;"></div>
+          <textarea id="memo-area" class="memo-area" style="position:relative;z-index:1;width:100%;height:100%;padding:8px 12px;" placeholder="알림, 공지, 과제..."></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;padding:3px 12px 6px;flex-shrink:0;">
+          <span id="memo-counter" style="font-size:10px;color:#aaccaa;">0자</span>
+        </div>
       </div>
     </div>
-
-    <!-- 칭찬 스티커 60% + 학급 온도계 40% -->
     <div style="display:grid;grid-template-columns:7fr 3fr;gap:10px;min-height:0;">
 
       <!-- 칭찬 스티커 -->
@@ -775,7 +772,6 @@ setInterval(updateClock,1000); updateClock();
 /* ══ 급식 ══ */
 function loadMeal(){
   var t=new Date();
-  document.getElementById('meal-date').textContent=t.getFullYear()+'년 '+(t.getMonth()+1)+'월 '+t.getDate()+'일';
   var ymd=t.getFullYear()+String(t.getMonth()+1).padStart(2,'0')+String(t.getDate()).padStart(2,'0');
   var keys=['274db1736f1049c88aac066d53196ddc','bfeb0c44a7654fd3a66e2333104b0082'];
   function tryKey(i){
@@ -787,7 +783,7 @@ function loadMeal(){
         var dish=data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g,'\n');
         var items=dish.split('\n').map(function(x){return x.replace(/\s*\([\d.,]+\)/g,'').trim();}).filter(Boolean);
         document.getElementById('meal-list').innerHTML=items.map(function(x){return '<div class="meal-item"><span class="meal-dot"></span><span>'+x+'</span></div>';}).join('');
-        document.getElementById('meal-status-badge').innerHTML='<span class="mbadge meal-live">실시간</span>';
+        
       }).catch(function(){tryKey(i+1);});
   }
   tryKey(0);
