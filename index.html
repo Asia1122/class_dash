@@ -1027,10 +1027,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       </div>
 
       <!-- 테마 카드 -->
-      <div class="card">
-        <div class="user-card-inner" style="flex-direction:column;gap:7px;">
+      <div class="card" style="position:relative;overflow:visible;">
+        <div class="user-card-inner">
           <button class="account-btn" id="theme-btn" onclick="togglePalette(event)">🎨 색상변경</button>
-          <div id="color-palette" style="display:none;flex-direction:row;gap:7px;justify-content:center;align-items:center;">
+          <!-- 팔레트: 카드 아래로 플로팅 -->
+          <div id="color-palette" style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);flex-direction:row;gap:8px;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border-radius:20px;padding:8px 12px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:1000;white-space:nowrap;">
             <div class="color-dot active" id="dot-mint"     style="background:linear-gradient(135deg,#b2f2bb,#6ee7a0);" onclick="pickTheme('mint')"></div>
             <div class="color-dot"        id="dot-sky"      style="background:linear-gradient(135deg,#bae6fd,#38bdf8);"  onclick="pickTheme('sky')"></div>
             <div class="color-dot"        id="dot-peach"    style="background:linear-gradient(135deg,#fecdd3,#fb7185);"  onclick="pickTheme('peach')"></div>
