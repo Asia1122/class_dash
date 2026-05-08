@@ -664,11 +664,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
   75%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent,0 0 0 0 transparent,-2px 0 0 0 #6ee7a0;}
   100%{box-shadow:0 -2px 0 0 #6ee7a0,0 0 0 0 transparent,0 0 0 0 transparent,0 0 0 0 transparent;}
 }
-.saving-ring{animation:spin-border .8s linear 3;border-radius:12px;}
 
 /* 테마 팔레트 */
-.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
-.color-dot:hover{transform:scale(1.2);}
+.color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.color-dot:hover{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
 .color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,0.2);}
 
 /* 달력 */
@@ -805,9 +804,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
 .s-btn{width:24px;height:24px;border-radius:50%;border:1px solid rgba(178,242,187,0.7);background:rgba(255,255,255,0.7);cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;color:#2d6a2d;padding:0;font-family:inherit;flex-shrink:0;}
 .s-btn:hover{background:rgba(178,242,187,0.5);}
 .s-btn.minus:hover{background:rgba(255,200,200,0.4);color:#c62828;border-color:#ffaaaa;}
-@keyframes spin-ring{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-.saving-ring{position:absolute;inset:-3px;border-radius:18px;border:2px solid transparent;border-top-color:#6ee7a0;border-right-color:#b2f2bb;animation:spin-ring .8s linear infinite;pointer-events:none;display:none;z-index:10;}
-.saving-ring.active{display:block;}
+/* 저장 토스트 */
+@keyframes toast-pop{0%{opacity:0;transform:translate(-50%,-8px) scale(0.9);}60%{transform:translate(-50%,2px) scale(1.03);}100%{opacity:1;transform:translate(-50%,0) scale(1);}}
+@keyframes toast-fade{to{opacity:0;transform:translate(-50%,-6px);}}
+#save-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(40,120,60,0.92),rgba(20,90,40,0.92));color:#fff;font-size:12px;font-weight:700;padding:7px 20px 7px 14px;border-radius:30px;z-index:99999;display:none;backdrop-filter:blur(12px);box-shadow:0 6px 24px rgba(0,0,0,0.2);letter-spacing:0.3px;white-space:nowrap;}
+#save-toast::before{content:"✓ ";font-size:13px;}
+#save-toast.show{display:block;animation:toast-pop .35s cubic-bezier(.34,1.56,.64,1) forwards;}
+#save-toast.hide{animation:toast-fade .35s ease forwards;}
 
 /* 즐겨찾기 */
 .bookmark-item{display:flex;align-items:center;gap:6px;padding:6px 4px;border-bottom:0.5px solid rgba(178,242,187,0.25);text-decoration:none;cursor:pointer;}
@@ -886,6 +889,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
   </div>
 </div>
 
+
+<div id="palette-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:99998;" onclick="closePalette()"></div>
+<div id="save-toast">✓ 저장됨</div>
 <div id="dashboard">
 
   <!-- 왼쪽 -->
@@ -1030,13 +1036,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
       <div class="card" style="position:relative;overflow:visible;">
         <div class="user-card-inner">
           <button class="account-btn" id="theme-btn" onclick="togglePalette(event)">🎨 색상변경</button>
-          <!-- 팔레트: 카드 아래로 플로팅 -->
-          <div id="color-palette" style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);flex-direction:row;gap:8px;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border-radius:20px;padding:8px 12px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:1000;white-space:nowrap;">
+          <!-- 팔레트: 화면 정중앙 모달 -->
+          <div id="color-palette" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);flex-direction:column;gap:16px;background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-radius:24px;padding:24px 32px;box-shadow:0 20px 60px rgba(0,0,0,0.25);z-index:99999;align-items:center;">
+            <div style="font-size:14px;font-weight:700;color:#1a5c2a;">🎨 테마 색상 선택</div>
+            <div style="display:flex;gap:14px;align-items:center;">
             <div class="color-dot active" id="dot-mint"     style="background:linear-gradient(135deg,#b2f2bb,#6ee7a0);" onclick="pickTheme('mint')"></div>
             <div class="color-dot"        id="dot-sky"      style="background:linear-gradient(135deg,#bae6fd,#38bdf8);"  onclick="pickTheme('sky')"></div>
             <div class="color-dot"        id="dot-peach"    style="background:linear-gradient(135deg,#fecdd3,#fb7185);"  onclick="pickTheme('peach')"></div>
             <div class="color-dot"        id="dot-lavender" style="background:linear-gradient(135deg,#ddd6fe,#a78bfa);"  onclick="pickTheme('lavender')"></div>
             <div class="color-dot"        id="dot-sun"      style="background:linear-gradient(135deg,#fef08a,#facc15);"  onclick="pickTheme('sun')"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1050,7 +1059,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
               로그인
             </button>
           </div>
-          <div class="saving-ring" id="save-ring"></div><div id="logout-state" style="display:none;width:100%;">
+          <div id="logout-state" style="display:none;width:100%;">
             <button class="account-btn" id="logout-btn" onclick="logout()">
               <img class="user-avatar" id="user-avatar" src="" alt="" style="width:18px;height:18px;border-radius:50%;">
               로그아웃
@@ -1219,14 +1228,23 @@ auth.onAuthStateChanged(function(user){
 
 /* ══ Firestore ══ */
 function userDoc(){ return db.collection('users').doc(currentUser.uid); }
+var _toastTimer=null;
+function showSaveToast(){
+  var t=document.getElementById('save-toast');
+  if(!t) return;
+  clearTimeout(_toastTimer);
+  t.className='show';
+  _toastTimer=setTimeout(function(){
+    t.className='hide';
+    setTimeout(function(){t.className='';},350);
+  },1800);
+}
 function saveToCloud(data){
   if(!currentUser) return;
   clearTimeout(saveTimer);
   saveTimer=setTimeout(function(){
     userDoc().set(data,{merge:true}).then(function(){
-      /* 저장됨 — 로그아웃 버튼에 테두리 빙글 효과 */
-      var btn=document.getElementById('logout-btn');
-      if(btn){ btn.classList.add('saving-ring'); setTimeout(function(){ btn.classList.remove('saving-ring'); },2500); }
+      showSaveToast();
     }).catch(function(e){ console.error('[저장실패]',e); });
   },1000);
 }
@@ -1704,17 +1722,16 @@ function setTheme(name){
 }
 function togglePalette(e){
   e.stopPropagation();
-  var p=document.getElementById('color-palette');
-  var btn=document.getElementById('theme-btn');
-  p.style.display='flex';
-  if(btn) btn.style.display='none';
+  document.getElementById('color-palette').style.display='flex';
+  document.getElementById('palette-overlay').style.display='block';
+}
+function closePalette(){
+  document.getElementById('color-palette').style.display='none';
+  document.getElementById('palette-overlay').style.display='none';
 }
 function pickTheme(name){
   setTheme(name);
-  var p=document.getElementById('color-palette');
-  var btn=document.getElementById('theme-btn');
-  p.style.display='none';
-  if(btn) btn.style.display='';
+  closePalette();
   document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('active');});
   var dot=document.getElementById('dot-'+name);if(dot)dot.classList.add('active');
 }
