@@ -894,7 +894,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8
   <!-- 왼쪽 -->
   <div id="col-left">
     <!-- 달력 + 메모 -->
-    <div style="display:grid;grid-template-columns:4fr 6fr;gap:10px;min-height:0;">
+    <div style="display:grid;grid-template-columns:9fr 11fr;gap:10px;min-height:0;">
       <div class="card">
         <div class="card-header"><div class="card-title"><div class="card-icon">📋</div>달력</div></div>
         <div style="flex:1;overflow:hidden;padding:6px 8px;" id="myodo-cal"></div>
@@ -1598,7 +1598,8 @@ function loadTodaySchedule(){
       var tmCol=findColByDate(dateRow,tomorrow.getMonth()+1,tomorrow.getDate());
       var todayCells=renderDayCol(rows,tCol);
       var tmCells=renderDayCol(rows,tmCol);
-      var html='<table style="width:100%;border-collapse:collapse;">'
+      var html='<table style="width:100%;border-collapse:collapse;table-layout:fixed;">'
+        +'<colgroup><col style="width:36px;"><col style="width:calc((100% - 36px)/2);"><col style="width:calc((100% - 36px)/2);"></colgroup>'
         +'<thead><tr>'
           +'<th style="width:36px;"></th>'
           +'<th style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:3px 0;border-bottom:1.5px solid rgba(178,242,187,0.5);">📅 오늘 ('+DAYS[today.getDay()]+')</th>'
