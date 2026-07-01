@@ -1269,7 +1269,7 @@ function loadMeal(){
   var keys=['274db1736f1049c88aac066d53196ddc','bfeb0c44a7654fd3a66e2333104b0082'];
   function tryKey(i){
     if(i>=keys.length){document.getElementById('meal-list').innerHTML='<div class="meal-loading">급식 정보 없음</div>';return;}
-    fetch('https://open.neis.go.kr/hub/mealServiceDietInfo?KEY='+keys[i]+'&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=Q10&SD_SCHUL_CODE=8511059&MMEAL_SC_CODE=2&MLSV_FROM_YMD='+ymd+'&MLSV_TO_YMD='+ymd)
+    fetch('https://open.neis.go.kr/hub/mealServiceDietInfo?KEY='+keys[i]+'&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=Q10&SD_SCHUL_CODE=8512049&MMEAL_SC_CODE=2&MLSV_FROM_YMD='+ymd+'&MLSV_TO_YMD='+ymd)
       .then(function(r){return r.json();})
       .then(function(data){
         if(!data.mealServiceDietInfo){tryKey(i+1);return;}
