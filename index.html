@@ -988,9 +988,9 @@ function loadTodaySchedule(){
       var tmCells=renderDayCol(rows,tmCol);
       var tmLabel=useNextLabel?('📅 다음('+DAYS[tomorrow.getDay()]+')'):('📅 내일 ('+DAYS[tomorrow.getDay()]+')');
       var html='<table style="width:100%;border-collapse:collapse;table-layout:fixed;">'
-        +'<colgroup><col style="width:36px;"><col style="width:calc((100% - 36px)/2);"><col style="width:calc((100% - 36px)/2);"></colgroup>'
+        +'<colgroup><col style="width:20px;"><col style="width:calc((100% - 20px)/2);"><col style="width:calc((100% - 20px)/2);"></colgroup>'
         +'<thead><tr>'
-          +'<th style="width:36px;"></th>'
+          +'<th style="width:20px;"></th>'
           +'<th style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:3px 0;border-bottom:1.5px solid rgba(178,242,187,0.5);">📅 오늘 ('+DAYS[today.getDay()]+')</th>'
           +'<th style="font-size:11px;font-weight:700;color:#4a7a4a;text-align:center;padding:3px 0;border-bottom:1.5px solid rgba(178,242,187,0.3);">'+tmLabel+'</th>'
         +'</tr></thead><tbody>';
@@ -999,7 +999,7 @@ function loadTodaySchedule(){
         var mc=tmCells[i]||{content:'',lines:[]};
         var pLabel=String(i+1)+'교시';
         html+='<tr>'
-          +'<td style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:4px 2px;line-height:1.3;">'+pLabel.split('').join('<br>')+'</td>'
+          +'<td style="font-size:11px;font-weight:700;color:#1a5c2a;text-align:center;padding:4px 0;line-height:1.3;">'+pLabel.split('').join('<br>')+'</td>'
           +'<td style="padding:3px 2px;vertical-align:top;"><span class="today-content" style="background:'+subjectBg(tc.content)+';display:block;">'+(tc.lines.length?tc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
           +'<td style="padding:3px 2px;vertical-align:top;"><span class="today-content" style="background:'+subjectBg(mc.content)+';display:block;">'+(mc.lines.length?mc.lines.join('<br>'):'<span style="color:#ddd;">—</span>')+'</span></td>'
         +'</tr>';
