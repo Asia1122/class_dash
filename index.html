@@ -946,21 +946,29 @@ function parseCSV(text){
   return rows;
 }
 function subjectBg(text){if(!text||!text.trim())return'';var t=text.trim();var map={'국어':'#e8f5e9','수학':'#e3f2fd','영어':'#fff8e1','과학':'#f3e5f5','사회':'#fce4ec','도덕':'#e0f7fa','체육':'#f1f8e9','음악':'#fce4ec','미술':'#fff3e0','실과':'#f1f8e9','창체':'#ede7f6','안전':'#fff3e0'};for(var k in map){if(t.indexOf(k)>=0)return map[k];}return'rgba(178,242,187,0.15)';}
-function findColByDate(dateRow,month,day){
-  for(var c=1;c<dateRow.length;c++){
-    var cell=dateRow[c].trim();
-    var m=cell.match(/(\d+)\s*월\s*(\d+)\s*일/);
-    if(m&&parseInt(m[1])===month&&parseInt(m[2])===day) return c;
-    var m2=cell.match(/^(\d+)\/(\d+)$/);
-    if(m2&&parseInt(m2[1])===month&&parseInt(m2[2])===day) return c;
+function findDateCell(rows,month,day){
+  for(var r=0;r<rows.length;r++){
+    var row=rows[r];
+    for(var c=1;c<row.length;c++){
+      var cell=(row[c]||'').trim();
+      var m=cell.match(/(\d+)\s*월\s*(\d+)\s*일/);
+      if(m&&parseInt(m[1])===month&&parseInt(m[2])===day) return{row:r,col:c};
+      var m2=cell.match(/^(\d+)\/(\d+)$/);
+      if(m2&&parseInt(m2[1])===month&&parseInt(m2[2])===day) return{row:r,col:c};
+    }
   }
-  return -1;
+  return null;
 }
-function renderDayCol(rows,colIdx){
-  /* 6개 셀 배열 반환 — 테이블 행에 맞게 */
+function renderDayCol(rows,pos){
+  /* 6개 셀 배열 반환 — 날짜행을 못 찾았으면 빈 셀 */
   var cells=[];
-  for(var r=4;r<=9;r++){
-    var content=(rows[r]&&rows[r][colIdx]||'').trim();
+  if(!pos){
+    for(var i=0;i<6;i++) cells.push({content:'',lines:[]});
+    return cells;
+  }
+  var startRow=pos.row+2; /* 날짜행 -> 요일행 -> 1교시행 순서이므로 +2 */
+  for(var r=startRow;r<startRow+6;r++){
+    var content=(rows[r]&&rows[r][pos.col]||'').trim();
     var lines=content.split('\n').map(function(s){return s.trim();}).filter(Boolean);
     cells.push({content:content,lines:lines});
   }
@@ -972,7 +980,7 @@ function loadTodaySchedule(){
   fetch(SHEET_CSV)
     .then(function(r){return r.text();})
     .then(function(text){
-      var rows=parseCSV(text), dateRow=rows[2]||[];
+      var rows=parseCSV(text);
       var today=new Date();
       var dow=today.getDay(); /* 0=일,1=월,...,6=토 */
       var addDays=1, useNextLabel=false;
@@ -982,10 +990,10 @@ function loadTodaySchedule(){
       var tomorrow=new Date(today);
       tomorrow.setDate(today.getDate()+addDays);
       var DAYS=['일','월','화','수','목','금','토'];
-      var tCol=findColByDate(dateRow,today.getMonth()+1,today.getDate());
-      var tmCol=findColByDate(dateRow,tomorrow.getMonth()+1,tomorrow.getDate());
-      var todayCells=renderDayCol(rows,tCol);
-      var tmCells=renderDayCol(rows,tmCol);
+      var tPos=findDateCell(rows,today.getMonth()+1,today.getDate());
+      var tmPos=findDateCell(rows,tomorrow.getMonth()+1,tomorrow.getDate());
+      var todayCells=renderDayCol(rows,tPos);
+      var tmCells=renderDayCol(rows,tmPos);
       var tmLabel=useNextLabel?('📅 다음('+DAYS[tomorrow.getDay()]+')'):('📅 내일 ('+DAYS[tomorrow.getDay()]+')');
       var html='<table style="width:100%;border-collapse:collapse;table-layout:fixed;">'
         +'<colgroup><col style="width:20px;"><col style="width:calc((100% - 20px)/2);"><col style="width:calc((100% - 20px)/2);"></colgroup>'
